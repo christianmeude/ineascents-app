@@ -34,6 +34,10 @@ String authErrorCopy(DioException e, {Map<String, Object?>? data}) {
       return 'Please wait a minute, then resend the code.';
     case 'EMAIL_CHANGE_NONE':
       return 'No code requested yet. Save your new email first.';
+    case 'CURRENT_PASSWORD_WRONG':
+      return 'Your current password is incorrect.';
+    case 'PASSWORD_CHANGE_NONE':
+      return 'No code requested yet. Request a code first.';
     default:
       return 'Something went wrong. Please try again.';
   }

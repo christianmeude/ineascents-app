@@ -56,9 +56,21 @@ class FakeApiBackend {
   /// When true, POST /api/user/email/resend answers 429.
   bool failResendCooldown = false;
 
+  /// Password-change state for POST /api/user/password/* (C15).
+  /// Current password the fake change endpoint accepts.
+  String expectedCurrentPassword = 'current-pass-1';
+
+  /// When non-null, POST /api/user/password/change answers with this code.
+  String? failPasswordChangeWith;
+
+  /// When true, POST /api/user/password/request answers 429.
+  bool failPasswordRequestCooldown = false;
+
   int putUserCallCount = 0;
   int verifyCallCount = 0;
   int resendCallCount = 0;
+  int passwordRequestCallCount = 0;
+  int passwordChangeCallCount = 0;
 
   int get _id => 999;
   String get _reference => 'IN-2026-000123';
@@ -228,6 +240,67 @@ class FakeHttpClientAdapter implements HttpClientAdapter {
         jsonEncode({
           'message': 'Code re-sent.',
           'code_expires_at': '2026-09-25T10:00:00.000Z',
+        }),
+      );
+    }
+
+    if (method == 'POST' && path == '/api/user/password/request') {
+      backend.passwordRequestCallCount++;
+      if (backend.failPasswordRequestCooldown) {
+        return _status(
+          429,
+          jsonEncode({
+            'message': 'Please wait a minute.',
+            'code': 'EMAIL_CODE_RESEND_TOO_SOON',
+          }),
+        );
+      }
+      return _json(
+        jsonEncode({
+          'message': 'Code sent.',
+          'code_expires_at': '2026-09-25T10:00:00.000Z',
+        }),
+      );
+    }
+
+    if (method == 'POST' && path == '/api/user/password/change') {
+      backend.passwordChangeCallCount++;
+      final body = _bodyMap(options);
+      if (backend.failPasswordChangeWith != null) {
+        return _status(
+          422,
+          jsonEncode({
+            'message': 'Password change failed.',
+            'code': backend.failPasswordChangeWith,
+            if (backend.failPasswordChangeWith == 'EMAIL_CODE_MISMATCH')
+              'attempts_left': 4,
+          }),
+        );
+      }
+      if (body['current_password']?.toString() !=
+          backend.expectedCurrentPassword) {
+        return _status(
+          422,
+          jsonEncode({
+            'message': 'Current password is incorrect.',
+            'code': 'CURRENT_PASSWORD_WRONG',
+          }),
+        );
+      }
+      if (body['code']?.toString() == backend.acceptedCode) {
+        return _json(
+          jsonEncode({
+            'message': 'Password changed.',
+            'code': 'PASSWORD_CHANGED',
+          }),
+        );
+      }
+      return _status(
+        422,
+        jsonEncode({
+          'message': "That code doesn't match.",
+          'code': 'EMAIL_CODE_MISMATCH',
+          'attempts_left': 4,
         }),
       );
     }

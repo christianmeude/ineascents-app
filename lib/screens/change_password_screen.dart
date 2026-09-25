@@ -1,18 +1,25 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../api/models/api_user_password_change_request_body.dart';
 import '../config/theme.dart';
+import '../src/providers/core_providers.dart';
 import '../widgets/index.dart';
+import 'auth_error_copy.dart';
 
-/// C39 (spec/UX scaffold, owner gate before merge — C15 wiring stays open):
-/// change-password form shell at `/profile/password`. No API calls.
+/// C15 (wired to backend A7):
+/// change-password form at `/profile/password`. First submit requests a
+/// code (POST /api/user/password/request); second submit changes the
+/// password (POST /api/user/password/change). Success keeps the current
+/// session (other Sanctum tokens are revoked server-side).
 ///
-/// Field contracts mirror backend A7 so C15 wiring needs no rework:
+/// Field contracts mirror backend A7:
 /// - current  -> `current_password` (wrong current rejected)
 /// - new      -> `password` (min 8)
 /// - confirm  -> `password_confirmation` (must match `password`)
-/// - code     -> `code` (6 digits; wrong code rejected; success revokes
-///   other Sanctum tokens only, current session kept)
+/// - code     -> `code` (6 digits; required once a code was requested)
 class ChangePasswordValidators {
   static String? validateCurrent(String value) {
     if (value.isEmpty) return 'Enter your current password.';
@@ -44,14 +51,15 @@ class ChangePasswordValidators {
   }
 }
 
-class ChangePasswordScreen extends StatefulWidget {
+class ChangePasswordScreen extends ConsumerStatefulWidget {
   const ChangePasswordScreen({super.key});
 
   @override
-  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
+  ConsumerState<ChangePasswordScreen> createState() =>
+      _ChangePasswordScreenState();
 }
 
-class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   final _currentController = TextEditingController();
   final _newController = TextEditingController();
   final _confirmController = TextEditingController();
@@ -60,6 +68,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool _obscureCurrent = true;
   bool _obscureNew = true;
   bool _obscureConfirm = true;
+
+  bool _sending = false;
+  bool _codeSent = false;
+  String? _formError;
 
   /// Fields show inline errors only after user interaction.
   final _touched = <String, bool>{};
@@ -77,6 +89,91 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     if (_touched[key] != true) setState(() => _touched[key] = true);
   }
 
+  String? get _currentError =>
+      ChangePasswordValidators.validateCurrent(_currentController.text);
+
+  String? get _newError => ChangePasswordValidators.validateNew(
+        _newController.text,
+        _currentController.text,
+      );
+
+  String? get _confirmError => ChangePasswordValidators.validateConfirm(
+        _confirmController.text,
+        _newController.text,
+      );
+
+  /// The code is required only once a code was requested; a half-typed
+  /// code still reports inline so typos surface early.
+  String? get _codeError {
+    final code = _codeController.text;
+    if (!_codeSent && code.isEmpty) return null;
+    return ChangePasswordValidators.validateCode(code);
+  }
+
+  void _snack(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _submit() async {
+    setState(() {
+      _touched['current'] = true;
+      _touched['new'] = true;
+      _touched['confirm'] = true;
+      _touched['code'] = true;
+      _formError = null;
+    });
+    if (_currentError != null ||
+        _newError != null ||
+        _confirmError != null ||
+        _codeError != null) {
+      return;
+    }
+    setState(() => _sending = true);
+    try {
+      final api = ref.read(apiClientProvider).profile;
+      if (!_codeSent) {
+        await api.postApiUserPasswordRequest();
+        if (!mounted) return;
+        setState(() => _codeSent = true);
+        _snack('Code sent to your email. Enter it below.');
+        return;
+      }
+      await api.postApiUserPasswordChange(
+        body: ApiUserPasswordChangeRequestBody(
+          currentPassword: _currentController.text,
+          code: _codeController.text.trim(),
+          password: _newController.text,
+          passwordConfirmation: _confirmController.text,
+        ),
+      );
+      if (!mounted) return;
+      _snack('Password changed.');
+      Navigator.of(context).maybePop();
+    } on DioException catch (e) {
+      setState(() => _formError = authErrorCopy(e));
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Future<void> _resend() async {
+    setState(() {
+      _sending = true;
+      _formError = null;
+    });
+    try {
+      await ref.read(apiClientProvider).profile.postApiUserPasswordRequest();
+      if (!mounted) return;
+      _snack('Code re-sent.');
+    } on DioException catch (e) {
+      setState(() => _formError = authErrorCopy(e));
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -87,26 +184,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         ? const Color(0xFFC4ACAC)
         : const Color(0xFF765867);
 
-    final currentError = _touched['current'] == true
-        ? ChangePasswordValidators.validateCurrent(
-            _currentController.text,
-          )
-        : null;
-    final newError = _touched['new'] == true
-        ? ChangePasswordValidators.validateNew(
-            _newController.text,
-            _currentController.text,
-          )
-        : null;
-    final confirmError = _touched['confirm'] == true
-        ? ChangePasswordValidators.validateConfirm(
-            _confirmController.text,
-            _newController.text,
-          )
-        : null;
-    final codeError = _touched['code'] == true
-        ? ChangePasswordValidators.validateCode(_codeController.text)
-        : null;
+    final currentError =
+        _touched['current'] == true ? _currentError : null;
+    final newError = _touched['new'] == true ? _newError : null;
+    final confirmError =
+        _touched['confirm'] == true ? _confirmError : null;
+    final codeError = _touched['code'] == true ? _codeError : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -167,6 +250,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (_formError != null) ...[
+                          FormErrorSummary(message: _formError!),
+                          const SizedBox(height: 12),
+                        ],
                         TextFormField(
                           key: const Key('change_password_current'),
                           controller: _currentController,
@@ -270,15 +357,24 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           key: const Key('change_password_code_error'),
                           message: codeError,
                         ),
+                        if (_codeSent) ...[
+                          const SizedBox(height: 4),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              key: const Key('change_password_resend'),
+                              onPressed: _sending ? null : _resend,
+                              child: const Text('Resend code'),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 24),
-                        // C39: scaffold only — submit stays disabled until
-                        // C15 wiring. No onPressed, no API calls.
                         SizedBox(
                           width: double.infinity,
                           height: 44,
                           child: ElevatedButton(
                             key: const Key('change_password_submit'),
-                            onPressed: null,
+                            onPressed: _sending ? null : _submit,
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   AppTheme.primaryButtonBackground,
@@ -288,9 +384,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                            child: const Text(
-                              'CHANGE PASSWORD',
-                              style: TextStyle(
+                            child: Text(
+                              _sending ? 'Changing…' : 'CHANGE PASSWORD',
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 1.2,

@@ -11,16 +11,24 @@ import 'package:inea_scents_client/src/providers/core_providers.dart';
 import 'helpers/fake_api.dart';
 
 /// C39: /profile/password scaffold — route resolves, four C15-mirror
-/// fields render, inline validation fires, submit stays disabled.
+/// fields render, inline validation fires. C15 wires submit to A7;
+/// full request/code/change flows live in c15_change_password_test.dart.
 void main() {
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
   Widget screenApp() {
-    return MaterialApp(
-      theme: AppTheme.lightTheme,
-      home: const ChangePasswordScreen(),
+    return ProviderScope(
+      overrides: [
+        apiClientProvider.overrideWithValue(
+          buildFakeRestClient(FakeApiBackend()),
+        ),
+      ],
+      child: MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: const ChangePasswordScreen(),
+      ),
     );
   }
 
@@ -92,7 +100,7 @@ void main() {
     });
   });
 
-  testWidgets('scaffold renders four fields with disabled submit', (
+  testWidgets('wired screen renders four fields with enabled submit', (
     tester,
   ) async {
     await tester.pumpWidget(screenApp());
@@ -106,7 +114,7 @@ void main() {
     final submit = tester.widget<ElevatedButton>(
       find.byKey(const Key('change_password_submit')),
     );
-    expect(submit.onPressed, isNull);
+    expect(submit.onPressed, isNotNull);
     expect(tester.takeException(), isNull);
   });
 
@@ -136,7 +144,7 @@ void main() {
     final submit = tester.widget<ElevatedButton>(
       find.byKey(const Key('change_password_submit')),
     );
-    expect(submit.onPressed, isNull);
+    expect(submit.onPressed, isNotNull);
     expect(tester.takeException(), isNull);
   });
 

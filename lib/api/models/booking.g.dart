@@ -22,6 +22,7 @@ _Booking _$BookingFromJson(Map<String, dynamic> json) => _Booking(
   paymentMethod: json['payment_method'] as String?,
   status: json['status'] as String?,
   checkoutUrl: json['checkout_url'] as String?,
+  inquiryId: (json['inquiry_id'] as num?)?.toInt(),
   package: json['package'] == null
       ? null
       : Package.fromJson(json['package'] as Map<String, dynamic>),
@@ -44,6 +45,7 @@ Map<String, dynamic> _$BookingToJson(_Booking instance) => <String, dynamic>{
   'payment_method': instance.paymentMethod,
   'status': instance.status,
   'checkout_url': instance.checkoutUrl,
+  'inquiry_id': instance.inquiryId,
   'package': instance.package,
   'scents': instance.scents,
 };

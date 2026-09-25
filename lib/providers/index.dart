@@ -154,6 +154,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
     }
   }
+
+  Future<void> updateUser(User user) async {
+    state = state.copyWith(user: user, errorMessage: null);
+  }
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {

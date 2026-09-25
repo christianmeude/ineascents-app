@@ -11,9 +11,9 @@ part 'post_api_bookings_response.g.dart';
 
 @Freezed()
 abstract class PostApiBookingsResponse with _$PostApiBookingsResponse {
-  const factory PostApiBookingsResponse({Booking? data}) =
-      _PostApiBookingsResponse;
-
-  factory PostApiBookingsResponse.fromJson(Map<String, Object?> json) =>
-      _$PostApiBookingsResponseFromJson(json);
+  const factory PostApiBookingsResponse({
+    Booking? data,
+  }) = _PostApiBookingsResponse;
+  
+  factory PostApiBookingsResponse.fromJson(Map<String, Object?> json) => _$PostApiBookingsResponseFromJson(json);
 }

@@ -14,11 +14,15 @@ abstract class Scent with _$Scent {
     int? id,
     String? name,
     String? description,
-    @JsonKey(name: 'image_url') String? imageUrl,
-    @JsonKey(name: 'is_available') bool? isAvailable,
-    @JsonKey(name: 'created_at') DateTime? createdAt,
-    @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'image_url')
+    String? imageUrl,
+    @JsonKey(name: 'is_available')
+    bool? isAvailable,
+    @JsonKey(name: 'created_at')
+    DateTime? createdAt,
+    @JsonKey(name: 'updated_at')
+    DateTime? updatedAt,
   }) = _Scent;
-
+  
   factory Scent.fromJson(Map<String, Object?> json) => _$ScentFromJson(json);
 }

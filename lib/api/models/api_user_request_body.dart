@@ -1,0 +1,18 @@
+// coverage:ignore-file
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, unused_import, invalid_annotation_target, unnecessary_import
+
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'api_user_request_body.freezed.dart';
+part 'api_user_request_body.g.dart';
+
+@Freezed()
+abstract class ApiUserRequestBody with _$ApiUserRequestBody {
+  const factory ApiUserRequestBody({
+    String? name,
+    String? email,
+  }) = _ApiUserRequestBody;
+  
+  factory ApiUserRequestBody.fromJson(Map<String, Object?> json) => _$ApiUserRequestBodyFromJson(json);
+}

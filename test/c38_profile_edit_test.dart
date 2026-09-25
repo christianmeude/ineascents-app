@@ -12,8 +12,8 @@ import 'package:inea_scents_client/src/services/token_storage.dart';
 
 import 'helpers/fake_api.dart';
 
-/// C38: /profile/edit scaffold — route resolves, fields validate inline,
-/// submit stays disabled, no wiring, no deferred notes.
+/// C38 scaffold superseded by C14 wiring: route resolves, fields validate
+/// inline, submit enabled. Validators live in the screen file.
 void main() {
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
@@ -32,17 +32,11 @@ void main() {
       expect(validateProfileEmail('a@b.co'), isNull);
     });
 
-    test('code required with new email, 6 digits when filled', () {
-      expect(validateProfileCode('', 'a@b.co'), 'Enter the 6-digit code');
-      expect(validateProfileCode('', ''), isNull);
-      expect(validateProfileCode('123', ''), 'Code must be 6 digits');
-      expect(validateProfileCode('123456', 'a@b.co'), isNull);
-    });
-
-    test('phone optional but must be valid when filled', () {
-      expect(validateProfilePhone(''), isNull);
-      expect(validateProfilePhone('abc'), 'Enter a valid phone number');
-      expect(validateProfilePhone('+639171234567'), isNull);
+    test('code required once requested, 6 digits when filled', () {
+      expect(validateProfileCode('', true), 'Enter the 6-digit code');
+      expect(validateProfileCode('', false), isNull);
+      expect(validateProfileCode('123', false), 'Code must be 6 digits');
+      expect(validateProfileCode('123456', true), isNull);
     });
   });
 
@@ -56,19 +50,17 @@ void main() {
     );
   }
 
-  testWidgets('edit screen renders fields, submit disabled, no notes',
-      (tester) async {
+  testWidgets('edit screen renders fields, submit enabled', (tester) async {
     await tester.pumpWidget(editApp());
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('edit_profile_name')), findsOneWidget);
     expect(find.byKey(const Key('edit_profile_email')), findsOneWidget);
     expect(find.byKey(const Key('edit_profile_code')), findsOneWidget);
-    expect(find.byKey(const Key('edit_profile_phone')), findsOneWidget);
 
     final submit =
         tester.widget<ElevatedButton>(find.byKey(const Key('edit_profile_submit')));
-    expect(submit.onPressed, isNull);
+    expect(submit.onPressed, isNotNull);
 
     expect(find.textContaining('C14'), findsNothing);
     expect(find.textContaining('C15'), findsNothing);
@@ -84,20 +76,13 @@ void main() {
     await tester.enterText(find.byKey(const Key('edit_profile_name')), 'A');
     await tester.enterText(
         find.byKey(const Key('edit_profile_email')), 'not-an-email');
-    await tester.enterText(find.byKey(const Key('edit_profile_phone')), 'abc');
     await tester.pumpAndSettle();
 
     expect(find.text('Name must be at least 2 characters'), findsOneWidget);
     expect(find.text('Enter a valid email address'), findsOneWidget);
-    expect(find.text('Enter a valid phone number'), findsOneWidget);
 
-    // Valid new email with no code demands the code.
     await tester.enterText(
         find.byKey(const Key('edit_profile_email')), 'new@example.com');
-    await tester.enterText(find.byKey(const Key('edit_profile_code')), '');
-    await tester.pumpAndSettle();
-    expect(find.text('Enter the 6-digit code'), findsOneWidget);
-
     await tester.enterText(find.byKey(const Key('edit_profile_code')), '123');
     await tester.pumpAndSettle();
     expect(find.text('Code must be 6 digits'), findsOneWidget);
@@ -165,9 +150,6 @@ void main() {
 
     expect(find.byType(EditProfileScreen), findsOneWidget);
     expect(find.byKey(const Key('edit_profile_submit')), findsOneWidget);
-    final submit =
-        tester.widget<ElevatedButton>(find.byKey(const Key('edit_profile_submit')));
-    expect(submit.onPressed, isNull);
     expect(tester.takeException(), isNull);
   });
 }

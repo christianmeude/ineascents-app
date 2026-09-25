@@ -13,8 +13,9 @@ abstract class User with _$User {
     int? id,
     String? name,
     String? email,
-    @JsonKey(name: 'is_admin') bool? isAdmin,
+    @JsonKey(name: 'is_admin')
+    bool? isAdmin,
   }) = _User;
-
+  
   factory User.fromJson(Map<String, Object?> json) => _$UserFromJson(json);
 }

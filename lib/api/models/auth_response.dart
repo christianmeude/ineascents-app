@@ -13,10 +13,11 @@ part 'auth_response.g.dart';
 abstract class AuthResponse with _$AuthResponse {
   const factory AuthResponse({
     User? user,
-    @JsonKey(name: 'access_token') String? accessToken,
-    @JsonKey(name: 'token_type') String? tokenType,
+    @JsonKey(name: 'access_token')
+    String? accessToken,
+    @JsonKey(name: 'token_type')
+    String? tokenType,
   }) = _AuthResponse;
-
-  factory AuthResponse.fromJson(Map<String, Object?> json) =>
-      _$AuthResponseFromJson(json);
+  
+  factory AuthResponse.fromJson(Map<String, Object?> json) => _$AuthResponseFromJson(json);
 }

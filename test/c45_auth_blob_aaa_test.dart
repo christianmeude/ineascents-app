@@ -140,7 +140,7 @@ void main() {
     const copy = <String, String>{
       'login': 'LOG IN',
       'register': 'REGISTER',
-      'forgot': 'EMAIL PASSWORD RESET LINK',
+      'forgot': 'SEND RESET CODE',
     };
 
     for (final theme in [AppTheme.lightTheme, AppTheme.darkTheme]) {

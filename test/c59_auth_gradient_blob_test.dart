@@ -115,7 +115,7 @@ void main() {
     const copy = <String, String>{
       'login': 'LOG IN',
       'register': 'REGISTER',
-      'forgot': 'EMAIL PASSWORD RESET LINK',
+      'forgot': 'SEND RESET CODE',
     };
 
     for (final width in [360.0, 1280.0]) {

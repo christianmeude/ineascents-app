@@ -1,11 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../providers/index.dart';
+import '../api/models/api_forgot_password_request_body.dart';
 import '../config/theme.dart';
 import '../src/providers/core_providers.dart';
 import '../widgets/index.dart';
+import 'auth_error_copy.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -17,68 +19,61 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final emailController = TextEditingController();
-  final passwordController = TextEditingController();
 
-  bool obscurePassword = true;
-  bool rememberMe = false;
+  bool _sending = false;
+  String? _formError;
 
   @override
   void dispose() {
     emailController.dispose();
-    passwordController.dispose();
     super.dispose();
   }
 
-  /// C52: reset-link POST; a transient failure surfaces a toast with
-  /// Retry, and the form-level failure renders in-card (see build).
-  /// Success stays a SnackBar.
-  Future<void> _sendResetLink() async {
-    final dioClient = ref.read(dioClientProvider);
+  static String? _validateEmail(String value) {
+    final text = value.trim();
+    if (text.isEmpty) return 'Enter your email address.';
+    if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(text)) {
+      return 'Enter a valid email address.';
+    }
+    return null;
+  }
+
+  void _snack(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// C93: request a reset code (POST /api/forgot-password). The backend
+  /// always answers success — address existence is never revealed — so a
+  /// code step follows unconditionally.
+  Future<void> _submit() async {
+    final emailError = _validateEmail(emailController.text);
+    if (emailError != null) {
+      setState(() => _formError = emailError);
+      return;
+    }
+    setState(() {
+      _sending = true;
+      _formError = null;
+    });
     try {
-      await dioClient.dio.post(
-        '/forgot-password',
-        data: {'email': emailController.text.trim()},
-      );
+      final email = emailController.text.trim();
+      await ref.read(apiClientProvider).auth.postApiForgotPassword(
+            body: ApiForgotPasswordRequestBody(email: email),
+          );
       if (!mounted) return;
-      // C30: clear any error banner before the success confirmation.
-      hideAppError(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password reset link sent!')),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      showAppError(
-        context,
-        message:
-            "We couldn't send the reset link. "
-            'Check your connection and try again.',
-        transient: true,
-        onRetry: _sendResetLink,
-      );
+      _snack('If that email exists, a code was sent.');
+      context.push('/reset-password?email=${Uri.encodeComponent(email)}');
+    } on DioException catch (e) {
+      setState(() => _formError = authErrorCopy(e));
+    } finally {
+      if (mounted) setState(() => _sending = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-
-    ref.listen(authProvider, (previous, next) {
-      if (next.isLoggedIn) {
-        // C52: never carry a prior error surface onto /home.
-        hideAppError(context);
-        context.go('/home');
-      } else if (next.errorMessage != null) {
-        // C52: form-level failure renders in-card (see build); only a
-        // transient failure additionally surfaces a toast with Retry.
-        final message =
-            next.errorMessage ??
-            "That didn't work. Check your details and try again.";
-        if (isTransientErrorMessage(message)) {
-          showAppError(context, message: message, transient: true);
-        }
-      }
-    });
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final inputLabelColor = isDark
         ? const Color(0xFFFDF4F5)
@@ -110,18 +105,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       children: [
                         const _ApplicationLogo(),
                         const SizedBox(height: 44),
-                        // C52: form-level failure renders in-card; the
-                        // reset-link toast (transient only) covers Retry.
-                        if (authState.errorMessage != null) ...[
+                        // C93: form-level failure renders in-card.
+                        if (_formError != null) ...[
                           FormErrorSummary(
-                            message: authState.errorMessage!,
+                            message: _formError!,
                           ),
                           const SizedBox(height: 16),
                         ],
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'Enter your email address to receive a secure password reset link.',
+                            'Enter your email address to receive a 6-digit reset code.',
                             style: GoogleFonts.figtree(
                               color: isDark
                                   ? const Color(
@@ -148,9 +142,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           width: double.infinity,
                           height: 44,
                           child: ElevatedButton(
-                            onPressed: authState.isLoading
-                                ? null
-                                : _sendResetLink,
+                            key: const Key('forgot_password_submit'),
+                            onPressed: _sending ? null : _submit,
                             style: ElevatedButton.styleFrom(
                               // C31: plum/cream token both modes.
                               backgroundColor:
@@ -161,7 +154,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                 borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                            child: authState.isLoading
+                            child: _sending
                                 ? const SizedBox(
                                     height: 16,
                                     width: 16,
@@ -172,7 +165,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                     ),
                                   )
                                 : Text(
-                                    'EMAIL PASSWORD RESET LINK',
+                                    'SEND RESET CODE',
                                     style: GoogleFonts.figtree(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,

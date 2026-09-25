@@ -179,6 +179,7 @@ class ResponsiveAppShell extends StatelessWidget {
             location.contains('login') ||
             location.contains('register') ||
             location.contains('forgot-password') ||
+            location.contains('reset-password') ||
             location.contains('splash');
         if (hideBottomNav) {
           return null;

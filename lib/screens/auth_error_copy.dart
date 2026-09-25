@@ -38,6 +38,8 @@ String authErrorCopy(DioException e, {Map<String, Object?>? data}) {
       return 'Your current password is incorrect.';
     case 'PASSWORD_CHANGE_NONE':
       return 'No code requested yet. Request a code first.';
+    case 'PASSWORD_RESET_NONE':
+      return 'No code requested yet. Request a code first.';
     default:
       return 'Something went wrong. Please try again.';
   }

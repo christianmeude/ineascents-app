@@ -11,9 +11,9 @@ part 'get_api_bookings_response.g.dart';
 
 @Freezed()
 abstract class GetApiBookingsResponse with _$GetApiBookingsResponse {
-  const factory GetApiBookingsResponse({List<Booking>? data}) =
-      _GetApiBookingsResponse;
-
-  factory GetApiBookingsResponse.fromJson(Map<String, Object?> json) =>
-      _$GetApiBookingsResponseFromJson(json);
+  const factory GetApiBookingsResponse({
+    List<Booking>? data,
+  }) = _GetApiBookingsResponse;
+  
+  factory GetApiBookingsResponse.fromJson(Map<String, Object?> json) => _$GetApiBookingsResponseFromJson(json);
 }

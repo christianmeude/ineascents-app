@@ -5,9 +5,13 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../models/api_forgot_password_request_body.dart';
 import '../models/api_login_request_body.dart';
 import '../models/api_register_request_body.dart';
+import '../models/api_reset_password_request_body.dart';
 import '../models/auth_response.dart';
+import '../models/post_api_forgot_password_response.dart';
+import '../models/post_api_reset_password_response.dart';
 import '../models/user.dart';
 
 part 'auth_api_client.g.dart';
@@ -31,4 +35,18 @@ abstract class AuthApiClient {
   /// Get authenticated user
   @GET('/api/user')
   Future<User> getApiUser();
+
+  /// Send password-reset code.
+  ///
+  /// Always the same response; address existence is never revealed.
+  @POST('/api/forgot-password')
+  Future<PostApiForgotPasswordResponse> postApiForgotPassword({
+    @Body() required ApiForgotPasswordRequestBody body,
+  });
+
+  /// Reset password with code
+  @POST('/api/reset-password')
+  Future<PostApiResetPasswordResponse> postApiResetPassword({
+    @Body() required ApiResetPasswordRequestBody body,
+  });
 }

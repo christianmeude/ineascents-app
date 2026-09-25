@@ -14,22 +14,33 @@ part 'booking.g.dart';
 abstract class Booking with _$Booking {
   const factory Booking({
     int? id,
-    @JsonKey(name: 'booking_reference') String? bookingReference,
-    @JsonKey(name: 'user_id') int? userId,
-    @JsonKey(name: 'customer_name') String? customerName,
-    @JsonKey(name: 'customer_email') String? customerEmail,
-    @JsonKey(name: 'customer_phone') String? customerPhone,
+    @JsonKey(name: 'booking_reference')
+    String? bookingReference,
+    @JsonKey(name: 'user_id')
+    int? userId,
+    @JsonKey(name: 'customer_name')
+    String? customerName,
+    @JsonKey(name: 'customer_email')
+    String? customerEmail,
+    @JsonKey(name: 'customer_phone')
+    String? customerPhone,
     int? pax,
-    @JsonKey(name: 'event_date') DateTime? eventDate,
-    @JsonKey(name: 'event_time') String? eventTime,
-    @JsonKey(name: 'venue_address') String? venueAddress,
-    @JsonKey(name: 'payment_method') String? paymentMethod,
+    @JsonKey(name: 'event_date')
+    DateTime? eventDate,
+    @JsonKey(name: 'event_time')
+    String? eventTime,
+    @JsonKey(name: 'venue_address')
+    String? venueAddress,
+    @JsonKey(name: 'payment_method')
+    String? paymentMethod,
     String? status,
-    @JsonKey(name: 'checkout_url') String? checkoutUrl,
+    @JsonKey(name: 'checkout_url')
+    String? checkoutUrl,
+    @JsonKey(name: 'inquiry_id')
+    int? inquiryId,
     Package? package,
     List<Scent>? scents,
   }) = _Booking;
-
-  factory Booking.fromJson(Map<String, Object?> json) =>
-      _$BookingFromJson(json);
+  
+  factory Booking.fromJson(Map<String, Object?> json) => _$BookingFromJson(json);
 }

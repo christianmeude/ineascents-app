@@ -9,9 +9,10 @@ part 'get_api_availability_response.g.dart';
 
 @Freezed()
 abstract class GetApiAvailabilityResponse with _$GetApiAvailabilityResponse {
-  const factory GetApiAvailabilityResponse({DateTime? date, String? status}) =
-      _GetApiAvailabilityResponse;
-
-  factory GetApiAvailabilityResponse.fromJson(Map<String, Object?> json) =>
-      _$GetApiAvailabilityResponseFromJson(json);
+  const factory GetApiAvailabilityResponse({
+    DateTime? date,
+    String? status,
+  }) = _GetApiAvailabilityResponse;
+  
+  factory GetApiAvailabilityResponse.fromJson(Map<String, Object?> json) => _$GetApiAvailabilityResponseFromJson(json);
 }

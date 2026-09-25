@@ -10,11 +10,10 @@ part 'get_api_packages_package_response.freezed.dart';
 part 'get_api_packages_package_response.g.dart';
 
 @Freezed()
-abstract class GetApiPackagesPackageResponse
-    with _$GetApiPackagesPackageResponse {
-  const factory GetApiPackagesPackageResponse({Package? data}) =
-      _GetApiPackagesPackageResponse;
-
-  factory GetApiPackagesPackageResponse.fromJson(Map<String, Object?> json) =>
-      _$GetApiPackagesPackageResponseFromJson(json);
+abstract class GetApiPackagesPackageResponse with _$GetApiPackagesPackageResponse {
+  const factory GetApiPackagesPackageResponse({
+    Package? data,
+  }) = _GetApiPackagesPackageResponse;
+  
+  factory GetApiPackagesPackageResponse.fromJson(Map<String, Object?> json) => _$GetApiPackagesPackageResponseFromJson(json);
 }

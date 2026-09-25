@@ -39,6 +39,27 @@ class FakeApiBackend {
   /// A single date for the given month/year marked as booked, or null.
   DateTime? bookedDate;
 
+  /// Profile state for PUT /api/user + verify/resend (C14).
+  String profileName = 'Maria Clara';
+  String profileEmail = 'maria@example.com';
+  String? pendingEmail;
+
+  /// Code the fake verify endpoint accepts.
+  String acceptedCode = '482916';
+
+  /// When non-null, PUT /api/user answers with this machine code.
+  String? failProfileWith;
+
+  /// When non-null, POST /api/user/email/verify answers with this code.
+  String? failVerifyWith;
+
+  /// When true, POST /api/user/email/resend answers 429.
+  bool failResendCooldown = false;
+
+  int putUserCallCount = 0;
+  int verifyCallCount = 0;
+  int resendCallCount = 0;
+
   int get _id => 999;
   String get _reference => 'IN-2026-000123';
 
@@ -97,6 +118,10 @@ class FakeHttpClientAdapter implements HttpClientAdapter {
       return _json('[]');
     }
 
+    if (method == 'GET' && path == '/api/user') {
+      return _json(jsonEncode(_profileJson()));
+    }
+
     if (method == 'POST' && path == '/api/bookings') {
       backend.createBookingCallCount++;
       if (backend.failCreateBooking) {
@@ -109,8 +134,7 @@ class FakeHttpClientAdapter implements HttpClientAdapter {
       );
     }
 
-    if (method == 'GET' && path == '/api/bookings') {
-      backend.bookingsEndpointCallCount++;
+    if (method == 'GET' && path == '/api/bookings') {      backend.bookingsEndpointCallCount++;
       if (backend.failBookings) {
         return _status(500, '{"detail":"bookings unavailable"}');
       }
@@ -131,7 +155,105 @@ class FakeHttpClientAdapter implements HttpClientAdapter {
       );
     }
 
+    if (method == 'PUT' && path == '/api/user') {
+      backend.putUserCallCount++;
+      final body = _bodyMap(options);
+      if (backend.failProfileWith != null) {
+        return _status(
+          422,
+          jsonEncode({
+            'message': 'That email is already in use.',
+            'code': backend.failProfileWith,
+          }),
+        );
+      }
+      if (body['name'] is String && (body['name'] as String).isNotEmpty) {
+        backend.profileName = body['name'] as String;
+      }
+      final email = body['email']?.toString() ?? '';
+      if (email.isNotEmpty && email != backend.profileEmail) {
+        backend.pendingEmail = email;
+        return _json(
+          jsonEncode({
+            'data': _profileJson(),
+            'email_pending': email,
+            'code_expires_at': '2026-09-25T10:00:00.000Z',
+          }),
+        );
+      }
+      return _json(jsonEncode({'data': _profileJson()}));
+    }
+
+    if (method == 'POST' && path == '/api/user/email/verify') {
+      backend.verifyCallCount++;
+      final body = _bodyMap(options);
+      if (backend.failVerifyWith != null) {
+        return _status(
+          422,
+          jsonEncode({
+            'message': "That code doesn't match.",
+            'code': backend.failVerifyWith,
+            'attempts_left': 4,
+          }),
+        );
+      }
+      if (body['code']?.toString() == backend.acceptedCode &&
+          backend.pendingEmail != null) {
+        backend.profileEmail = backend.pendingEmail!;
+        backend.pendingEmail = null;
+        return _json(jsonEncode({'data': _profileJson()}));
+      }
+      return _status(
+        422,
+        jsonEncode({
+          'message': "That code doesn't match.",
+          'code': 'EMAIL_CODE_MISMATCH',
+          'attempts_left': 4,
+        }),
+      );
+    }
+
+    if (method == 'POST' && path == '/api/user/email/resend') {
+      backend.resendCallCount++;
+      if (backend.failResendCooldown) {
+        return _status(
+          429,
+          jsonEncode({
+            'message': 'Please wait a minute.',
+            'code': 'EMAIL_CODE_RESEND_TOO_SOON',
+          }),
+        );
+      }
+      return _json(
+        jsonEncode({
+          'message': 'Code re-sent.',
+          'code_expires_at': '2026-09-25T10:00:00.000Z',
+        }),
+      );
+    }
+
     return _status(404, '{"detail":"not found"}');
+  }
+
+  Map<String, Object?> _profileJson() => {
+        'id': 1,
+        'name': backend.profileName,
+        'email': backend.profileEmail,
+        'is_admin': false,
+      };
+
+  Map<String, Object?> _bodyMap(RequestOptions options) {
+    final data = options.data;
+    if (data is Map) return Map<String, Object?>.from(data);
+    if (data is String && data.isNotEmpty) {
+      return Map<String, Object?>.from(jsonDecode(data) as Map);
+    }
+    try {
+      final json = (data as dynamic).toJson() as Map;
+      return Map<String, Object?>.from(json);
+    } catch (_) {
+      return {};
+    }
   }
 }
 

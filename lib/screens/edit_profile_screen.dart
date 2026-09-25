@@ -1,19 +1,24 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../api/models/api_user_email_verify_request_body.dart';
+import '../api/models/api_user_request_body.dart';
+import '../api/models/user.dart';
 import '../providers/index.dart';
+import '../src/providers/core_providers.dart';
 import '../widgets/index.dart';
+import 'auth_error_copy.dart';
 
 // ============================================================================
-// EDIT PROFILE SCREEN (C38: scaffolded deferred form — no wiring, C14 open)
+// EDIT PROFILE SCREEN (C14: wired to backend A6)
 // ============================================================================
 //
-// Field contracts match backend A6 so C14 wiring needs no rework:
-// - name updates inline (prefilled from the current User).
-// - email swaps only after code verify: the new address goes in the email
-//   field, the mailed code goes in the verification-code field, and the
-//   current address stays the login until the swap completes.
-// - phone mirrors the removed C29 card field.
+// - Name saves inline via PUT /api/user.
+// - New email: submit requests a code (PUT with email), then submit with the
+//   code verifies it (POST /api/user/email/verify). The current address stays
+//   the login until the swap completes.
+// - Error words come from the shared auth phrasebook (auth_error_copy.dart).
 
 /// Name must be non-blank.
 String? validateProfileName(String? value) {
@@ -33,26 +38,15 @@ String? validateProfileEmail(String? value) {
   return null;
 }
 
-/// Verification code: required when a new email is entered, otherwise
+/// Verification code: required when a code was requested, otherwise
 /// optional; whenever filled it must be 6 digits.
-String? validateProfileCode(String? value, String emailValue) {
+String? validateProfileCode(String? value, bool codeRequested) {
   final code = value == null ? '' : value.trim();
-  final wantsSwap = emailValue.trim().isNotEmpty;
   if (code.isEmpty) {
-    if (wantsSwap) return 'Enter the 6-digit code';
+    if (codeRequested) return 'Enter the 6-digit code';
     return null;
   }
   if (!RegExp(r'^\d{6}$').hasMatch(code)) return 'Code must be 6 digits';
-  return null;
-}
-
-/// Phone is optional; when filled it must look like a phone number.
-String? validateProfilePhone(String? value) {
-  final text = value == null ? '' : value.trim();
-  if (text.isEmpty) return null;
-  if (!RegExp(r'^[+0-9][0-9 ()\-]{5,}$').hasMatch(text)) {
-    return 'Enter a valid phone number';
-  }
   return null;
 }
 
@@ -68,7 +62,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
   late final TextEditingController _codeController;
-  late final TextEditingController _phoneController;
+
+  bool _sending = false;
+  bool _codeSent = false;
+  String? _formError;
 
   @override
   void initState() {
@@ -77,7 +74,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _nameController = TextEditingController(text: user?.name ?? '');
     _emailController = TextEditingController();
     _codeController = TextEditingController();
-    _phoneController = TextEditingController();
   }
 
   @override
@@ -85,8 +81,80 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _nameController.dispose();
     _emailController.dispose();
     _codeController.dispose();
-    _phoneController.dispose();
     super.dispose();
+  }
+
+  void _snack(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _done(String message, User? user) async {
+    if (user != null) {
+      await ref.read(authProvider.notifier).updateUser(user);
+    }
+    if (!mounted) return;
+    _snack(message);
+    Navigator.of(context).maybePop();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() {
+      _sending = true;
+      _formError = null;
+    });
+    try {
+      final api = ref.read(apiClientProvider).profile;
+      final name = _nameController.text.trim();
+      final email = _emailController.text.trim();
+      final code = _codeController.text.trim();
+
+      if (email.isEmpty) {
+        final res = await api.putApiUser(body: ApiUserRequestBody(name: name));
+        await _done('Profile updated.', res.data);
+        return;
+      }
+
+      if (!_codeSent || code.isEmpty) {
+        final res = await api.putApiUser(
+          body: ApiUserRequestBody(name: name, email: email),
+        );
+        if (res.emailPending != null) {
+          setState(() => _codeSent = true);
+          _snack('Code sent to $email. Enter it below.');
+          return;
+        }
+        await _done('Profile updated.', res.data);
+        return;
+      }
+
+      final verified = await api.postApiUserEmailVerify(
+        body: ApiUserEmailVerifyRequestBody(code: code),
+      );
+      await _done('Email updated.', verified.data);
+    } on DioException catch (e) {
+      setState(() => _formError = authErrorCopy(e));
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Future<void> _resend() async {
+    setState(() {
+      _sending = true;
+      _formError = null;
+    });
+    try {
+      await ref.read(apiClientProvider).profile.postApiUserEmailResend();
+      if (!mounted) return;
+      _snack('Code re-sent.');
+    } on DioException catch (e) {
+      setState(() => _formError = authErrorCopy(e));
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
   }
 
   @override
@@ -118,6 +186,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (_formError != null) ...[
+                        FormErrorSummary(message: _formError!),
+                        const SizedBox(height: 12),
+                      ],
                       TextFormField(
                         key: const Key('edit_profile_name'),
                         controller: _nameController,
@@ -148,36 +220,32 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         key: const Key('edit_profile_code'),
                         controller: _codeController,
                         keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.next,
+                        textInputAction: TextInputAction.done,
                         autofillHints: const [AutofillHints.oneTimeCode],
                         decoration: const InputDecoration(
                           labelText: 'Verification code',
                         ),
-                        validator: (value) => validateProfileCode(
-                          value,
-                          _emailController.text,
+                        validator: (value) =>
+                            validateProfileCode(value, _codeSent),
+                      ),
+                      if (_codeSent) ...[
+                        const SizedBox(height: 4),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            key: const Key('edit_profile_resend'),
+                            onPressed: _sending ? null : _resend,
+                            child: const Text('Resend code'),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        key: const Key('edit_profile_phone'),
-                        controller: _phoneController,
-                        keyboardType: TextInputType.phone,
-                        textInputAction: TextInputAction.done,
-                        autofillHints: const [
-                          AutofillHints.telephoneNumber,
-                        ],
-                        decoration: const InputDecoration(labelText: 'Phone'),
-                        validator: validateProfilePhone,
-                      ),
+                      ],
                       const SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           key: const Key('edit_profile_submit'),
-                          // C38: scaffold only — no wiring (C14 stays open).
-                          onPressed: null,
-                          child: const Text('Save changes'),
+                          onPressed: _sending ? null : _submit,
+                          child: Text(_sending ? 'Saving…' : 'Save changes'),
                         ),
                       ),
                     ],

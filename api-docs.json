@@ -144,6 +144,73 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "put": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Update profile name, request email change",
+                "description": "Name saves inline. A new email issues a verification code to that address; the login email swaps only after verification.",
+                "operationId": "1fba4955d6de4874aef867256246f4c1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Jane Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jane@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated; email_pending set when a code was sent",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "email_pending": {
+                                            "type": "string",
+                                            "example": "jane@example.com",
+                                            "nullable": true
+                                        },
+                                        "code_expires_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error or email taken"
+                    },
+                    "429": {
+                        "description": "Code resend cooldown"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/availability": {
@@ -474,31 +541,36 @@
                 }
             }
         },
-        "/api/wishlist": {
-            "get": {
+        "/api/user/password/request": {
+            "post": {
                 "tags": [
-                    "Wishlist"
+                    "Profile"
                 ],
-                "summary": "Get user's wishlist",
-                "operationId": "25e51433040f79ef596ee4001198d4f2",
+                "summary": "Send password-change code to current email",
+                "operationId": "b7ffbeb5473b7360b1effd92947bb46f",
                 "responses": {
                     "200": {
-                        "description": "List of wishlist packages",
+                        "description": "Code sent",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Package"
-                                            }
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Code sent."
+                                        },
+                                        "code_expires_at": {
+                                            "type": "string",
+                                            "format": "date-time"
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "description": "Resend cooldown"
                     }
                 },
                 "security": [
@@ -508,25 +580,40 @@
                 ]
             }
         },
-        "/api/wishlist/toggle": {
+        "/api/user/password/change": {
             "post": {
                 "tags": [
-                    "Wishlist"
+                    "Profile"
                 ],
-                "summary": "Toggle package in wishlist",
-                "operationId": "c690ac875ef9156df71fdce102c96867",
+                "summary": "Change password with current password + code",
+                "operationId": "6c5a6ee6f3e9fa1ee2474e324d9a3f33",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "package_id"
+                                    "current_password",
+                                    "code",
+                                    "password",
+                                    "password_confirmation"
                                 ],
                                 "properties": {
-                                    "package_id": {
-                                        "type": "integer",
-                                        "example": 1
+                                    "current_password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "482916"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password"
                                     }
                                 },
                                 "type": "object"
@@ -536,16 +623,18 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Toggle status",
+                        "description": "Password changed; other tokens revoked",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "attached": {
-                                            "type": "boolean"
-                                        },
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "example": "Password changed."
+                                        },
+                                        "code": {
+                                            "type": "string",
+                                            "example": "PASSWORD_CHANGED"
                                         }
                                     },
                                     "type": "object"
@@ -553,11 +642,230 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthenticated"
+                    "422": {
+                        "description": "Wrong current password, bad code, or validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/forgot-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Send password-reset code",
+                "description": "Always the same response; address existence is never revealed.",
+                "operationId": "26d8a8cf23158e1cc9328a1b496aaa59",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jane@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Code sent if the address exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "If that email exists, a code was sent."
+                                        },
+                                        "code": {
+                                            "type": "string",
+                                            "example": "PASSWORD_RESET_SENT"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/reset-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Reset password with code",
+                "operationId": "332753b13234d6dc5fe08f75e8537cfd",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "code",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jane@example.com"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "482916"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset; all tokens revoked",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password reset."
+                                        },
+                                        "code": {
+                                            "type": "string",
+                                            "example": "PASSWORD_RESET_DONE"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No pending reset"
                     },
                     "422": {
-                        "description": "Validation Error"
+                        "description": "Wrong, expired, or locked code"
+                    }
+                }
+            }
+        },
+        "/api/user/email/verify": {
+            "post": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Verify email change with code",
+                "operationId": "a2b9a97d2230196af4a2fa5b0535fc00",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "code"
+                                ],
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "example": "482916"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email swapped to the verified address",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No pending email change"
+                    },
+                    "422": {
+                        "description": "Wrong, expired, or locked code"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/email/resend": {
+            "post": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Re-send email change code",
+                "operationId": "8a4011999a0c94e35ced1a675054e020",
+                "responses": {
+                    "200": {
+                        "description": "Fresh code sent to the pending address",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Code re-sent."
+                                        },
+                                        "code_expires_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No pending email change"
+                    },
+                    "429": {
+                        "description": "Resend cooldown"
                     }
                 },
                 "security": [
@@ -852,8 +1160,8 @@
             "description": "Inquiries"
         },
         {
-            "name": "Wishlist",
-            "description": "Wishlist"
+            "name": "Profile",
+            "description": "Profile"
         }
     ]
 }

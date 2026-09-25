@@ -32,6 +32,12 @@ class AppRouter {
         path: '/forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
+      GoRoute(
+        path: '/reset-password',
+        builder: (context, state) => ResetPasswordScreen(
+          initialEmail: state.queryParameters['email'] ?? '',
+        ),
+      ),
       // C23: stateful tabs — each tab keeps its own stack, so switching
       // tabs never resets the other tabs. Platform page transitions come
       // from AppTheme.pageTransitionsTheme (Cupertino iOS / Zoom Android /

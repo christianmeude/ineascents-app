@@ -72,6 +72,17 @@ class FakeApiBackend {
   int passwordRequestCallCount = 0;
   int passwordChangeCallCount = 0;
 
+  /// Forgot/reset state for POST /api/forgot-password + /api/reset-password
+  /// (C93). The fake accepts any email (backend never reveals existence)
+  /// and tracks whether a code was requested.
+  bool resetCodeRequested = false;
+
+  /// When non-null, POST /api/reset-password answers with this code.
+  String? failResetPasswordWith;
+
+  int forgotPasswordCallCount = 0;
+  int resetPasswordCallCount = 0;
+
   int get _id => 999;
   String get _reference => 'IN-2026-000123';
 
@@ -292,6 +303,59 @@ class FakeHttpClientAdapter implements HttpClientAdapter {
           jsonEncode({
             'message': 'Password changed.',
             'code': 'PASSWORD_CHANGED',
+          }),
+        );
+      }
+      return _status(
+        422,
+        jsonEncode({
+          'message': "That code doesn't match.",
+          'code': 'EMAIL_CODE_MISMATCH',
+          'attempts_left': 4,
+        }),
+      );
+    }
+
+    if (method == 'POST' && path == '/api/forgot-password') {
+      backend.forgotPasswordCallCount++;
+      backend.resetCodeRequested = true;
+      return _json(
+        jsonEncode({
+          'message': 'If that email exists, a code was sent.',
+          'code': 'PASSWORD_RESET_SENT',
+        }),
+      );
+    }
+
+    if (method == 'POST' && path == '/api/reset-password') {
+      backend.resetPasswordCallCount++;
+      final body = _bodyMap(options);
+      if (backend.failResetPasswordWith != null) {
+        return _status(
+          backend.failResetPasswordWith == 'PASSWORD_RESET_NONE' ? 404 : 422,
+          jsonEncode({
+            'message': 'Password reset failed.',
+            'code': backend.failResetPasswordWith,
+            if (backend.failResetPasswordWith == 'EMAIL_CODE_MISMATCH')
+              'attempts_left': 4,
+          }),
+        );
+      }
+      if (!backend.resetCodeRequested) {
+        return _status(
+          404,
+          jsonEncode({
+            'message': 'No pending code. Request a new one first.',
+            'code': 'PASSWORD_RESET_NONE',
+          }),
+        );
+      }
+      if (body['code']?.toString() == backend.acceptedCode) {
+        backend.resetCodeRequested = false;
+        return _json(
+          jsonEncode({
+            'message': 'Password reset.',
+            'code': 'PASSWORD_RESET_DONE',
           }),
         );
       }

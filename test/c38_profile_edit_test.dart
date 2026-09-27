@@ -56,7 +56,9 @@ void main() {
 
     expect(find.byKey(const Key('edit_profile_name')), findsOneWidget);
     expect(find.byKey(const Key('edit_profile_email')), findsOneWidget);
-    expect(find.byKey(const Key('edit_profile_code')), findsOneWidget);
+    // C94: code section stays hidden until a code is requested.
+    expect(find.byKey(const Key('edit_profile_code')), findsNothing);
+    expect(find.byKey(const Key('edit_profile_resend')), findsNothing);
 
     final submit =
         tester.widget<ElevatedButton>(find.byKey(const Key('edit_profile_submit')));
@@ -83,9 +85,10 @@ void main() {
 
     await tester.enterText(
         find.byKey(const Key('edit_profile_email')), 'new@example.com');
-    await tester.enterText(find.byKey(const Key('edit_profile_code')), '123');
     await tester.pumpAndSettle();
-    expect(find.text('Code must be 6 digits'), findsOneWidget);
+    // C94: no code field before a request, so no code error either.
+    expect(find.byKey(const Key('edit_profile_code')), findsNothing);
+    expect(find.text('Code must be 6 digits'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

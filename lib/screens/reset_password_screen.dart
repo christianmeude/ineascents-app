@@ -237,20 +237,38 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           message: emailError,
                         ),
                         const SizedBox(height: 16),
-                        _FieldLabel(text: '6-digit code', color: inputLabelColor),
-                        const SizedBox(height: 4),
-                        CustomTextField(
-                          key: const Key('reset_password_code'),
-                          controller: _codeController,
-                          keyboardType: TextInputType.number,
-                          textInputAction: TextInputAction.next,
-                          autofillHints: const [AutofillHints.oneTimeCode],
-                          hintText: '123456',
-                          onChanged: (_) => _touch('code'),
-                        ),
-                        InlineFieldError(
-                          key: const Key('reset_password_code_error'),
-                          message: codeError,
+                        GatedCodeSection(
+                          // Post-request step: reached only after the forgot
+                          // screen sends the code, so the section is open.
+                          codeSent: true,
+                          field: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _FieldLabel(
+                                  text: '6-digit code',
+                                  color: inputLabelColor),
+                              const SizedBox(height: 4),
+                              CustomTextField(
+                                key: const Key('reset_password_code'),
+                                controller: _codeController,
+                                keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.next,
+                                autofillHints: const [
+                                  AutofillHints.oneTimeCode
+                                ],
+                                hintText: '123456',
+                                onChanged: (_) => _touch('code'),
+                              ),
+                              InlineFieldError(
+                                key: const Key('reset_password_code_error'),
+                                message: codeError,
+                              ),
+                            ],
+                          ),
+                          sending: _sending,
+                          onResend: _resend,
+                          resendKey: const Key('reset_password_resend'),
                         ),
                         const SizedBox(height: 16),
                         _FieldLabel(text: 'New password', color: inputLabelColor),
@@ -311,14 +329,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                         InlineFieldError(
                           key: const Key('reset_password_confirm_error'),
                           message: confirmError,
-                        ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            key: const Key('reset_password_resend'),
-                            onPressed: _sending ? null : _resend,
-                            child: const Text('Resend code'),
-                          ),
                         ),
                         const SizedBox(height: 8),
                         SizedBox(

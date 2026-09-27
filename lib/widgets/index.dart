@@ -26,6 +26,7 @@ export 'error_banner.dart';
 export 'inline_errors.dart';
 export 'mobile_clamp_scroll.dart';
 export 'auth_background.dart';
+export 'gated_code_section.dart';
 export 'processing_payment_overlay.dart';
 export 'micro_interactions.dart';
 export 'success_check.dart';

@@ -102,8 +102,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (response.accessToken != null) {
         await _tokenStorage.saveToken(response.accessToken!);
       }
+      // C95: pending registration returns zero token — stay logged out so
+      // the register screen routes to /verify-email instead of /home.
       state = state.copyWith(
-        isLoggedIn: true,
+        isLoggedIn: response.accessToken != null,
         user: response.user,
         isLoading: false,
       );

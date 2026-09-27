@@ -83,6 +83,29 @@ class FakeApiBackend {
   int forgotPasswordCallCount = 0;
   int resetPasswordCallCount = 0;
 
+  /// Registration state for POST /api/register + /register/verify +
+  /// /register/resend + /api/login (C95/A11). Register creates a pending
+  /// user with zero token; verify marks the address verified; login is
+  /// gated with EMAIL_NOT_VERIFIED until then.
+  String? registeredEmail;
+  String registeredName = 'Maria Clara';
+  bool registerCodeRequested = false;
+  final Set<String> verifiedEmails = {};
+
+  /// When non-null, POST /api/register answers with this machine code.
+  String? failRegisterWith;
+
+  /// When non-null, POST /api/register/verify answers with this code.
+  String? failRegisterVerifyWith;
+
+  /// When true, POST /api/register/resend answers 429.
+  bool failRegisterResendCooldown = false;
+
+  int registerCallCount = 0;
+  int registerVerifyCallCount = 0;
+  int registerResendCallCount = 0;
+  int loginCallCount = 0;
+
   int get _id => 999;
   String get _reference => 'IN-2026-000123';
 
@@ -365,6 +388,163 @@ class FakeHttpClientAdapter implements HttpClientAdapter {
           'message': "That code doesn't match.",
           'code': 'EMAIL_CODE_MISMATCH',
           'attempts_left': 4,
+        }),
+      );
+    }
+
+    if (method == 'POST' && path == '/api/register') {
+      backend.registerCallCount++;
+      final body = _bodyMap(options);
+      if (backend.failRegisterWith != null) {
+        return _status(
+          422,
+          jsonEncode({
+            'message': 'That email is already in use.',
+            'code': backend.failRegisterWith,
+          }),
+        );
+      }
+      final email = body['email']?.toString() ?? '';
+      final name = body['name']?.toString() ?? '';
+      backend.registeredEmail = email;
+      if (name.isNotEmpty) backend.registeredName = name;
+      backend.registerCodeRequested = true;
+      // Zero token: pending users verify first, then log in.
+      return _status(
+        201,
+        jsonEncode({
+          'user': {
+            'id': 1,
+            'name': backend.registeredName,
+            'email': email,
+            'is_admin': false,
+          },
+          'message': 'Verify your email to finish registration.',
+          'code_expires_at': '2026-09-27T10:00:00.000Z',
+        }),
+      );
+    }
+
+    if (method == 'POST' && path == '/api/register/verify') {
+      backend.registerVerifyCallCount++;
+      final body = _bodyMap(options);
+      if (backend.failRegisterVerifyWith != null) {
+        return _status(
+          backend.failRegisterVerifyWith == 'REGISTER_NONE' ? 404 : 422,
+          jsonEncode({
+            'message': 'Registration verification failed.',
+            'code': backend.failRegisterVerifyWith,
+            if (backend.failRegisterVerifyWith == 'EMAIL_CODE_MISMATCH')
+              'attempts_left': 4,
+          }),
+        );
+      }
+      final email = body['email']?.toString() ?? '';
+      if (email == backend.registeredEmail &&
+          backend.verifiedEmails.contains(email)) {
+        // A11: verify is idempotent once the address is verified.
+        return _json(
+          jsonEncode({
+            'id': 1,
+            'name': backend.registeredName,
+            'email': email,
+            'is_admin': false,
+          }),
+        );
+      }
+      if (!backend.registerCodeRequested ||
+          backend.registeredEmail == null ||
+          email != backend.registeredEmail) {
+        return _status(
+          404,
+          jsonEncode({
+            'message': 'No pending registration.',
+            'code': 'REGISTER_NONE',
+          }),
+        );
+      }
+      if (body['code']?.toString() == backend.acceptedCode) {
+        backend.verifiedEmails.add(email);
+        backend.registerCodeRequested = false;
+        return _json(
+          jsonEncode({
+            'id': 1,
+            'name': backend.registeredName,
+            'email': email,
+            'is_admin': false,
+          }),
+        );
+      }
+      return _status(
+        422,
+        jsonEncode({
+          'message': "That code doesn't match.",
+          'code': 'EMAIL_CODE_MISMATCH',
+          'attempts_left': 4,
+        }),
+      );
+    }
+
+    if (method == 'POST' && path == '/api/register/resend') {
+      backend.registerResendCallCount++;
+      final body = _bodyMap(options);
+      final email = body['email']?.toString() ?? '';
+      if (backend.registeredEmail == null || email != backend.registeredEmail) {
+        return _status(
+          404,
+          jsonEncode({
+            'message': 'No pending registration.',
+            'code': 'REGISTER_NONE',
+          }),
+        );
+      }
+      if (backend.failRegisterResendCooldown) {
+        return _status(
+          429,
+          jsonEncode({
+            'message': 'Please wait a minute.',
+            'code': 'EMAIL_CODE_RESEND_TOO_SOON',
+          }),
+        );
+      }
+      backend.registerCodeRequested = true;
+      return _json(
+        jsonEncode({
+          'message': 'Code re-sent.',
+          'code_expires_at': '2026-09-27T10:00:00.000Z',
+        }),
+      );
+    }
+
+    if (method == 'POST' && path == '/api/login') {
+      backend.loginCallCount++;
+      final body = _bodyMap(options);
+      final email = body['email']?.toString() ?? '';
+      if (email == backend.registeredEmail &&
+          !backend.verifiedEmails.contains(email)) {
+        return _status(
+          422,
+          jsonEncode({
+            'message': 'Verify your email first.',
+            'code': 'EMAIL_NOT_VERIFIED',
+          }),
+        );
+      }
+      if (email != backend.registeredEmail ||
+          !backend.verifiedEmails.contains(email)) {
+        // Unknown address: legacy 404 (no test user exists).
+        return _status(404, '{"detail":"not found"}');
+      }
+      return _json(
+        jsonEncode({
+          'user': {
+            'id': 1,
+            'name': backend.registeredName,
+            'email': email,
+            'is_admin': false,
+          },
+          'access_token': 'fake-token',
+          'token_type': 'Bearer',
         }),
       );
     }

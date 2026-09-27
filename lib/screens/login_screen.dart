@@ -7,7 +7,10 @@ import '../config/theme.dart';
 import '../widgets/index.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.verified = false});
+
+  /// True when arriving from /verify-email — shows the verified notice.
+  final bool verified;
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -92,6 +95,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(
                           height: 44,
                         ), // Adjusted to account for the visual overhang of the logo
+
+                        // C95: verified notice after register→verify.
+                        if (widget.verified) ...[
+                          _VerifiedNotice(isDark: isDark),
+                          const SizedBox(height: 16),
+                        ],
 
                         // C52: form-level failure renders in-card; Retry
                         // only for transient failures (toast covers those).
@@ -571,6 +580,57 @@ class _LinkButtonState extends State<_LinkButton> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// VERIFIED NOTICE (C95: register→verify lands on /login?verified=1)
+// ============================================================================
+
+class _VerifiedNotice extends StatelessWidget {
+  final bool isDark;
+
+  const _VerifiedNotice({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('login_verified_notice'),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF151012).withValues(alpha: 0.6)
+            : Colors.white.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.primaryButtonBackground.withValues(alpha: 0.5),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.check_circle_outline,
+            size: 20,
+            color: AppTheme.primaryButtonBackground,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Email verified. Log in to continue.',
+              style: GoogleFonts.figtree(
+                color: isDark
+                    ? const Color(0xFFFDF4F5)
+                    : const Color(0xFF6A4053),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

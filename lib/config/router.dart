@@ -18,7 +18,12 @@ class AppRouter {
         path: '/splash',
         builder: (context, state) => const SplashScreen(),
       ),
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => LoginScreen(
+          verified: state.queryParameters['verified'] == '1',
+        ),
+      ),
       // C38: scaffolded edit-profile form (submit disabled, C14 open).
       GoRoute(
         path: '/profile/edit',
@@ -35,6 +40,12 @@ class AppRouter {
       GoRoute(
         path: '/reset-password',
         builder: (context, state) => ResetPasswordScreen(
+          initialEmail: state.queryParameters['email'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/verify-email',
+        builder: (context, state) => VerifyEmailScreen(
           initialEmail: state.queryParameters['email'] ?? '',
         ),
       ),

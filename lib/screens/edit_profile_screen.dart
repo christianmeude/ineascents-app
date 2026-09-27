@@ -216,29 +216,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         onChanged: (_) => setState(() {}),
                       ),
                       const SizedBox(height: 12),
-                      TextFormField(
-                        key: const Key('edit_profile_code'),
-                        controller: _codeController,
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.done,
-                        autofillHints: const [AutofillHints.oneTimeCode],
-                        decoration: const InputDecoration(
-                          labelText: 'Verification code',
-                        ),
-                        validator: (value) =>
-                            validateProfileCode(value, _codeSent),
-                      ),
-                      if (_codeSent) ...[
-                        const SizedBox(height: 4),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            key: const Key('edit_profile_resend'),
-                            onPressed: _sending ? null : _resend,
-                            child: const Text('Resend code'),
+                      GatedCodeSection(
+                        codeSent: _codeSent,
+                        field: TextFormField(
+                          key: const Key('edit_profile_code'),
+                          controller: _codeController,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.done,
+                          autofillHints: const [AutofillHints.oneTimeCode],
+                          decoration: const InputDecoration(
+                            labelText: 'Verification code',
                           ),
+                          validator: (value) =>
+                              validateProfileCode(value, _codeSent),
                         ),
-                      ],
+                        sending: _sending,
+                        onResend: _resend,
+                        resendKey: const Key('edit_profile_resend'),
+                      ),
                       const SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,

@@ -109,7 +109,9 @@ void main() {
     expect(find.byKey(const Key('change_password_current')), findsOneWidget);
     expect(find.byKey(const Key('change_password_new')), findsOneWidget);
     expect(find.byKey(const Key('change_password_confirm')), findsOneWidget);
-    expect(find.byKey(const Key('change_password_code')), findsOneWidget);
+    // C94: code section stays hidden until a code is requested.
+    expect(find.byKey(const Key('change_password_code')), findsNothing);
+    expect(find.byKey(const Key('change_password_resend')), findsNothing);
 
     final submit = tester.widget<ElevatedButton>(
       find.byKey(const Key('change_password_submit')),
@@ -125,6 +127,10 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(
+      find.byKey(const Key('change_password_current')),
+      'current-pass-1',
+    );
+    await tester.enterText(
       find.byKey(const Key('change_password_new')),
       'brand-new-pass-2',
     );
@@ -132,13 +138,27 @@ void main() {
       find.byKey(const Key('change_password_confirm')),
       'other-pass-3',
     );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Passwords do not match.'), findsOneWidget);
+
+    await tester.enterText(
+      find.byKey(const Key('change_password_confirm')),
+      'brand-new-pass-2',
+    );
+    await tester.tap(find.byKey(const Key('change_password_submit')));
+    await tester.pumpAndSettle();
+
+    // C94: code section appears only after the request succeeds.
+    expect(find.byKey(const Key('change_password_code')), findsOneWidget);
+
     await tester.enterText(
       find.byKey(const Key('change_password_code')),
       '12ab',
     );
+    await tester.tap(find.byKey(const Key('change_password_submit')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Passwords do not match.'), findsOneWidget);
     expect(find.text('Code must be 6 digits.'), findsOneWidget);
 
     final submit = tester.widget<ElevatedButton>(

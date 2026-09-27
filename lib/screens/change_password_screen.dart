@@ -341,33 +341,28 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                           message: confirmError,
                         ),
                         const SizedBox(height: 16),
-                        TextFormField(
-                          key: const Key('change_password_code'),
-                          controller: _codeController,
-                          keyboardType: TextInputType.number,
-                          textInputAction: TextInputAction.done,
-                          autofillHints: const [AutofillHints.oneTimeCode],
-                          decoration: const InputDecoration(
-                            labelText: '6-digit code',
-                            hintText: '123456',
+                        GatedCodeSection(
+                          codeSent: _codeSent,
+                          field: TextFormField(
+                            key: const Key('change_password_code'),
+                            controller: _codeController,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.done,
+                            autofillHints: const [AutofillHints.oneTimeCode],
+                            decoration: const InputDecoration(
+                              labelText: '6-digit code',
+                              hintText: '123456',
+                            ),
+                            onChanged: (_) => _touch('code'),
                           ),
-                          onChanged: (_) => _touch('code'),
+                          sending: _sending,
+                          onResend: _resend,
+                          resendKey: const Key('change_password_resend'),
                         ),
                         InlineFieldError(
                           key: const Key('change_password_code_error'),
                           message: codeError,
                         ),
-                        if (_codeSent) ...[
-                          const SizedBox(height: 4),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              key: const Key('change_password_resend'),
-                              onPressed: _sending ? null : _resend,
-                              child: const Text('Resend code'),
-                            ),
-                          ),
-                        ],
                         const SizedBox(height: 24),
                         SizedBox(
                           width: double.infinity,

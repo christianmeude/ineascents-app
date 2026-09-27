@@ -12,4 +12,5 @@ export 'edit_profile_screen.dart';
 export 'auth_error_copy.dart';
 export 'forgot_password_screen.dart';
 export 'reset_password_screen.dart';
+export 'verify_email_screen.dart';
 export 'change_password_screen.dart';

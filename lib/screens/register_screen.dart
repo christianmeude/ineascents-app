@@ -37,6 +37,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         // C52: never carry a prior error surface onto /home.
         hideAppError(context);
         context.go('/home');
+      } else if (previous?.isLoading == true &&
+          !next.isLoading &&
+          next.errorMessage == null &&
+          next.user != null) {
+        // C95: pending registration (zero token) — verify email first.
+        hideAppError(context);
+        final email = emailController.text.trim().isNotEmpty
+            ? emailController.text.trim()
+            : (next.user?.email ?? '');
+        context.go('/verify-email?email=${Uri.encodeComponent(email)}');
       } else if (next.errorMessage != null) {
         // C52: form-level failure renders in-card (see build); only a
         // transient failure additionally surfaces a toast with Retry.
@@ -118,6 +128,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         _InputLabel(text: 'Full Name', color: inputLabelColor),
                         const SizedBox(height: 4),
                         CustomTextField(
+                          key: const Key('register_name'),
                           controller: nameController,
                           keyboardType: TextInputType.name,
                           textInputAction: TextInputAction.next,
@@ -129,6 +140,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         _InputLabel(text: 'Email', color: inputLabelColor),
                         const SizedBox(height: 4),
                         CustomTextField(
+                          key: const Key('register_email'),
                           controller: emailController,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
@@ -140,6 +152,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         _InputLabel(text: 'Password', color: inputLabelColor),
                         const SizedBox(height: 4),
                         CustomTextField(
+                          key: const Key('register_password'),
                           controller: passwordController,
                           obscureText: obscurePassword,
                           autofillHints: const [AutofillHints.password],
@@ -165,6 +178,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           width: double.infinity,
                           height: 44,
                           child: ElevatedButton(
+                            key: const Key('register_submit'),
                             onPressed: authState.isLoading
                                 ? null
                                 : () {

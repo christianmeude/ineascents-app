@@ -3,9 +3,9 @@
     "short_name": "Inea Scents",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#fdf4f5",
+    "theme_color": "#6a4053",
+    "description": "Inea Scents — bespoke scent experiences for unforgettable events.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

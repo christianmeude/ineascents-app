@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+import '../widgets/app_logo.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -91,55 +92,10 @@ class _SplashScreenState extends State<SplashScreen>
                   opacity: _fadeAnimation,
                   child: ScaleTransition(
                     scale: _scaleAnimation,
-                    child: SizedBox(
+                    // C101: shared wordmark (was inline INEA/Scents dup).
+                    child: const SizedBox(
                       width: 280,
-                      height: 120,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Positioned(
-                            top: 20,
-                            left: 30,
-                            child: Text(
-                              'INEA',
-                              style: GoogleFonts.josefinSans(
-                                fontSize: 68,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 6,
-                                height: 1,
-                                color: Colors.white,
-                                shadows: const [
-                                  Shadow(
-                                    color: Color(0xB3653A4C),
-                                    blurRadius: 12,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 10,
-                            right: 20,
-                            child: Text(
-                              'Scents',
-                              style: GoogleFonts.greatVibes(
-                                fontSize: 66,
-                                fontWeight: FontWeight.w400,
-                                height: 1,
-                                color: Colors.white,
-                                shadows: const [
-                                  Shadow(
-                                    color: Color(0xB3653A4C),
-                                    blurRadius: 12,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      child: AppLogo(),
                     ),
                   ),
                 ),

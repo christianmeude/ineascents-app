@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../config/theme.dart';
 import 'bottom_nav_bar.dart';
+import 'tab_header.dart';
 import 'theme_toggle_button.dart';
 
 class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
@@ -348,6 +349,9 @@ class _BrandLogoState extends State<_BrandLogo> {
                     style: GoogleFonts.greatVibes(
                       fontSize: 20,
                       color: const Color(0xFFFDF4F5),
+                      // C101: script-first offline-safe fallback (single-source).
+                    ).copyWith(
+                      fontFamilyFallback: TabHeader.titleFallback,
                     ),
                   ),
                 ],

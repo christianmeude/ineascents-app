@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../config/theme.dart';
+import 'tab_header.dart';
 
 class AppLogo extends StatelessWidget {
   const AppLogo({super.key});
@@ -9,12 +10,14 @@ class AppLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // C101: plum/cream via single-source tokens (values identical —
+    // primaryButtonBackground == 0xFF6A4053, onPrimaryButton == 0xFFFDF4F5).
     final brandPrimary = isDark
-        ? const Color(0xFFFDF4F5)
-        : const Color(0xFF6A4053);
+        ? AppTheme.onPrimaryButton
+        : AppTheme.primaryButtonBackground;
     final strokeColor = isDark
-        ? const Color(0xFF6A4053)
-        : const Color(0xFFFDF4F5);
+        ? AppTheme.primaryButtonBackground
+        : AppTheme.onPrimaryButton;
 
     final sw = MediaQuery.of(context).size.width;
     final isDesktop = sw >= 640;
@@ -53,6 +56,8 @@ class AppLogo extends StatelessWidget {
       color: brandPrimary,
     ).copyWith(fontFamilyFallback: AppTheme.brandFontFallback);
 
+    // C101: script-first offline-safe fallback (copyWith AFTER —
+    // the package overwrites fontFamilyFallback internally).
     final scentsStroke = GoogleFonts.greatVibes(
       fontSize: scentsSize,
       foreground: Paint()
@@ -60,12 +65,12 @@ class AppLogo extends StatelessWidget {
         ..strokeWidth = 3
         ..strokeJoin = StrokeJoin.round
         ..color = strokeColor,
-    );
+    ).copyWith(fontFamilyFallback: TabHeader.titleFallback);
 
     final scentsFill = GoogleFonts.greatVibes(
       fontSize: scentsSize,
       color: brandPrimary,
-    );
+    ).copyWith(fontFamilyFallback: TabHeader.titleFallback);
 
     return FittedBox(
       fit: BoxFit.fitWidth,

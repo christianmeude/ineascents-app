@@ -34,7 +34,7 @@ CheckoutWindow? openCheckoutWindow() {
       final card = web.HTMLDivElement()..className = 'card';
       final brand = web.HTMLDivElement()
         ..className = 'brand'
-        ..textContent = 'INEA SCENTS';
+        ..textContent = 'Inea Scents';
       final ring = web.HTMLDivElement()..className = 'ring';
       final heading = web.HTMLHeadingElement.h1()
         ..textContent = 'Preparing your secure checkout…';

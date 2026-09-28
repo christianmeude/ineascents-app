@@ -310,7 +310,7 @@ class _BrandLogoState extends State<_BrandLogo> {
       },
       child: Semantics(
         button: true,
-        label: 'INEA Scents Home',
+        label: 'Inea Scents Home',
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: widget.onTap,

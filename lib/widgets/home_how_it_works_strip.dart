@@ -4,7 +4,12 @@ import 'card_surfaces.dart';
 
 /// C91: minimal How-it-works strip for Home (Browse → Schedule).
 class HomeHowItWorksStrip extends StatelessWidget {
-  const HomeHowItWorksStrip({super.key});
+  const HomeHowItWorksStrip({super.key, this.compact = false});
+
+  /// C99: rail placement forces the vertical step stack — the 1/4 rail is
+  /// too narrow for the two-column switch, and LayoutBuilder cannot live
+  /// under the IntrinsicHeight the hero row needs for equal height.
+  final bool compact;
 
   static const steps = <({String title, String body})>[
     (
@@ -47,42 +52,33 @@ class HomeHowItWorksStrip extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final wide = constraints.maxWidth >=
-                  _HowItWorksBreakpoints.twoCol;
-              if (!wide) {
-                return Column(
+          if (compact)
+            const _StepsColumn()
+          else
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final wide = constraints.maxWidth >=
+                    _HowItWorksBreakpoints.twoCol;
+                if (!wide) {
+                  return const _StepsColumn();
+                }
+                return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     for (var i = 0; i < steps.length; i++) ...[
-                      if (i > 0) const SizedBox(height: 12),
-                      _StepRow(
-                        index: i + 1,
-                        title: steps[i].title,
-                        body: steps[i].body,
+                      if (i > 0) const SizedBox(width: 16),
+                      Expanded(
+                        child: _StepRow(
+                          index: i + 1,
+                          title: steps[i].title,
+                          body: steps[i].body,
+                        ),
                       ),
                     ],
                   ],
                 );
-              }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (var i = 0; i < steps.length; i++) ...[
-                    if (i > 0) const SizedBox(width: 16),
-                    Expanded(
-                      child: _StepRow(
-                        index: i + 1,
-                        title: steps[i].title,
-                        body: steps[i].body,
-                      ),
-                    ),
-                  ],
-                ],
-              );
-            },
-          ),
+              },
+            ),
         ],
       ),
     );
@@ -93,6 +89,28 @@ class HomeHowItWorksStrip extends StatelessWidget {
 /// on phones even inside the padded home column.
 abstract final class _HowItWorksBreakpoints {
   static const double twoCol = 600.0;
+}
+
+/// Vertical step stack — phone layout and C99 rail mode.
+class _StepsColumn extends StatelessWidget {
+  const _StepsColumn();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < HomeHowItWorksStrip.steps.length; i++) ...[
+          if (i > 0) const SizedBox(height: 12),
+          _StepRow(
+            index: i + 1,
+            title: HomeHowItWorksStrip.steps[i].title,
+            body: HomeHowItWorksStrip.steps[i].body,
+          ),
+        ],
+      ],
+    );
+  }
 }
 
 class _StepRow extends StatelessWidget {

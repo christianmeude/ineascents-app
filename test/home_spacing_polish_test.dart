@@ -81,6 +81,8 @@ void main() {
         expect(headerInsets.bottom, 0);
 
         // C91: body + How-it-works strip keep symmetric horizontal 20.
+        // C99: strip folded into the body pad (rail on wide, stack on
+        // mobile) — one padded block, edges still 20px.
         final edges = tester
             .widgetList<Padding>(find.byWidgetPredicate(
               (w) =>
@@ -88,7 +90,7 @@ void main() {
                   w.padding == const EdgeInsets.symmetric(horizontal: 20),
             ))
             .length;
-        expect(edges, 2);
+        expect(edges, 1);
       });
     }
   });

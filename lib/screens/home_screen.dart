@@ -50,6 +50,11 @@ class HomeScreen extends StatelessWidget {
                   // the 768px breakpoint matches the repo tablet token
                   // exactly — padded content width would shift it to 808.
                   // No catalog grid lives here.
+                  // C99: asymmetric hero rail on wide — 3/4 Upcoming hero
+                  // + 1/4 How-it-works rail, equal height via stretch
+                  // (strip fills its slot), teaser + next step full-width
+                  // below. Mobile keeps the stacked concierge order with
+                  // the strip below.
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Builder(
@@ -66,38 +71,47 @@ class HomeScreen extends StatelessWidget {
                               NextStepCard(),
                               SizedBox(height: 16),
                               _OfferingTeaser(),
+                              SizedBox(height: 16),
+                              HomeHowItWorksStrip(),
                             ],
                           );
                         }
-                        return const Row(
-                          key: Key('home_two_col'),
+                        return const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: UpcomingBookingSection(),
-                            ),
-                            SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
+                            // C99: max content — row height is the tallest
+                            // child; stretch fills both to it (unbounded
+                            // scroll height forbids bare stretch).
+                            IntrinsicHeight(
+                              child: Row(
+                                key: Key('home_two_col'),
                                 crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
+                                    CrossAxisAlignment.stretch,
                                 children: [
-                                  NextStepCard(),
-                                  SizedBox(height: 16),
-                                  _OfferingTeaser(),
+                                  Expanded(
+                                    flex: 3,
+                                    child: UpcomingBookingSection(),
+                                  ),
+                                  SizedBox(width: 16),
+                                  // C99: strip fills the rail slot so both
+                                  // cards share the row height visually.
+                                  Expanded(
+                                    flex: 1,
+                                    child: HomeHowItWorksStrip(
+                                      compact: true,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
+                            SizedBox(height: 16),
+                            NextStepCard(),
+                            SizedBox(height: 16),
+                            _OfferingTeaser(),
                           ],
                         );
                       },
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: HomeHowItWorksStrip(),
                   ),
                   const SizedBox(height: 20),
                 ],

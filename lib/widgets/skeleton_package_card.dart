@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
+
+import 'tab_header.dart';
 
 class SkeletonPackageCard extends StatelessWidget {
   const SkeletonPackageCard({super.key});
@@ -119,6 +122,33 @@ class SkeletonPackagesLoading extends StatelessWidget {
         key: const Key('skeleton_packages_loading'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // C97: Collections header tease — script title per TabHeader
+          // (Great Vibes) + count slot bar; mirrors the real header
+          // above the hero instead of jumping straight to content.
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                key: const Key('skeleton_collections_header'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Our Collections',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.greatVibes(
+                      fontSize: TabHeader.titleSizeFor(constraints.maxWidth),
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
+                    ).copyWith(
+                        fontFamilyFallback: TabHeader.titleFallback),
+                  ),
+                  const SizedBox(height: 5),
+                  bar(height: 13, width: 200, radius: 6),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 20),
           // Hero mirror: 200px banner (mobile) with thumb + text block.
           LayoutBuilder(
             builder: (context, constraints) {
@@ -136,10 +166,20 @@ class SkeletonPackagesLoading extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      width: imageWidth,
-                      height: bannerHeight,
-                      color: Colors.white,
+                    // C97: clip the thumb to the left edge (topLeft +
+                    // bottomLeft 20) like the real PackageOfferingHero —
+                    // square image corners must not poke past the outer
+                    // rounding, which stays circular(20) on both edges.
+                    ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        bottomLeft: Radius.circular(20),
+                      ),
+                      child: Container(
+                        width: imageWidth,
+                        height: bannerHeight,
+                        color: Colors.white,
+                      ),
                     ),
                     Expanded(
                       child: Padding(

@@ -269,6 +269,10 @@ final availabilityProvider =
 
 // Bookings provider
 final bookingsProvider = FutureProvider<List<Booking>>((ref) async {
+  // C98: re-scope the cached list whenever the signed-in identity changes,
+  // so logout → login as a different User refetches instead of serving the
+  // previous User's cached Bookings.
+  ref.watch(authProvider.select((auth) => auth.user?.id));
   final apiClient = ref.watch(apiClientProvider);
   final response = await apiClient.bookings.getApiBookings();
   return response.data ?? [];

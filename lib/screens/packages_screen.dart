@@ -132,11 +132,15 @@ class _PackagesScreenState extends ConsumerState<PackagesScreen> {
                                     const SizedBox(height: 20),
                                     Text(
                                       'Choose your Pax Choice',
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      // C113: theme ramp (explicit Figtree).
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            color: textColor,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
                                     const SizedBox(height: 12),
                                     if (!wide) ...[
@@ -247,11 +251,12 @@ class _CarriedDateBanner extends StatelessWidget {
           Expanded(
             child: Text(
               'Showing for ${formatDateParam(date)} — carried from the calendar.',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: CardSurfaces.title(context),
-              ),
+              // C113: theme ramp (explicit Figtree).
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: CardSurfaces.title(context),
+                  ),
             ),
           ),
         ],
@@ -270,23 +275,19 @@ class _EmptyPackages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // P6 (Q1): solid + dark-aware, like every other state card.
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark
-        ? const Color(0xFFFDF4F5)
-        : const Color(0xFF633E50);
-    final secondaryTextColor = isDark
-        ? const Color(0xFFC4ACAC)
-        : const Color(0xFF765867);
+    // C113: single-source surfaces (were inline hex).
+    final textColor = CardSurfaces.title(context);
+    final secondaryTextColor = CardSurfaces.body(context);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 55, horizontal: 25),
 
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C1618) : Colors.white,
+        color: CardSurfaces.cardBg(context),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isDark ? const Color(0xFF36222C) : const Color(0x4D99868C),
+          color: CardSurfaces.cardBorder(context),
         ),
       ),
 
@@ -299,11 +300,12 @@ class _EmptyPackages extends StatelessWidget {
           SelectableText(
             'No Offerings available',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            // C113: theme ramp (explicit Figtree).
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: textColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
 
           const SizedBox(height: 6),
@@ -311,7 +313,8 @@ class _EmptyPackages extends StatelessWidget {
           SelectableText(
             'Please check back again later.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: secondaryTextColor, fontSize: 13),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: secondaryTextColor, fontSize: 13),
           ),
         ],
       ),

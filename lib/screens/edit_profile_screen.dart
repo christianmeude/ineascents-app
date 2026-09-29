@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../api/models/api_user_email_verify_request_body.dart';
 import '../api/models/api_user_request_body.dart';
 import '../api/models/user.dart';
+import '../config/theme.dart';
 import '../providers/index.dart';
 import '../src/providers/core_providers.dart';
 import '../widgets/index.dart';
@@ -240,7 +241,25 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         child: ElevatedButton(
                           key: const Key('edit_profile_submit'),
                           onPressed: _sending ? null : _submit,
-                          child: Text(_sending ? 'Saving…' : 'Save changes'),
+                          // C119: spinner + label parity with auth screens.
+                          child: _sending
+                              ? const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      height: 16,
+                                      width: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        // C31 parity: cream spinner on plum.
+                                        color: AppTheme.onPrimaryButton,
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text('Saving…'),
+                                  ],
+                                )
+                              : const Text('Save changes'),
                         ),
                       ),
                     ],

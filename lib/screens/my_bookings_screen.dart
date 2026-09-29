@@ -13,23 +13,9 @@ enum _BookingsSort { recent, status, price, eventDate }
 class MyBookingsScreen extends ConsumerStatefulWidget {
   const MyBookingsScreen({super.key});
 
-  // ============================================================
-  // INEA COLORS
-  // ============================================================
-
-  // P6 (G5): shared ambient triple so the capped local gradient melts
-  // into the shell's full-bleed ambient instead of stopping at 1200px.
-  static const Color backgroundTop = Color(0xFFF8E9DF);
-  static const Color backgroundMiddle = Color(0xFFD8B0BA);
-  static const Color backgroundBottom = Color(0xFFB78C9C);
-
+  // C115: dead local palette removed (P6 ambient lives in the shell;
+  // text/border resolve via CardSurfaces). Only the primary alias stays.
   static const Color primaryColor = AppTheme.primary;
-  static const Color primaryLight = Color(0xFF95647E);
-
-  static const Color textColor = Color(0xFF633E50);
-  static const Color secondaryTextColor = Color(0xFF765867);
-
-  static const Color borderColor = Color(0xFFE4CBD2);
 
   @override
   ConsumerState<MyBookingsScreen> createState() =>
@@ -907,12 +893,13 @@ class _StatusBadge extends StatelessWidget {
 
           Text(
             status.toUpperCase(),
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.6,
-              color: color,
-            ),
+            // C115: theme ramp (explicit Figtree).
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.6,
+                  color: color,
+                ),
           ),
         ],
       ),
@@ -968,11 +955,12 @@ class _EmptyBookings extends StatelessWidget {
 
             Text(
               'No bookings yet',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: CardSurfaces.title(context),
-              ),
+              // C115: theme ramp (explicit Figtree).
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: CardSurfaces.title(context),
+                  ),
             ),
 
             const SizedBox(height: 8),
@@ -981,11 +969,12 @@ class _EmptyBookings extends StatelessWidget {
               'Your perfume experiences and upcoming '
               'events will appear here.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.5,
-                color: CardSurfaces.body(context),
-              ),
+              // C115: theme ramp (explicit Figtree).
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 13,
+                    height: 1.5,
+                    color: CardSurfaces.body(context),
+                  ),
             ),
 
             const SizedBox(height: 28),
@@ -1005,9 +994,11 @@ class _EmptyBookings extends StatelessWidget {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
+              child: Text(
                 'Explore Pax Choices',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                // C115: theme ramp (explicit Figtree).
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    fontSize: 14, fontWeight: FontWeight.w600),
               ),
             ),
           ],

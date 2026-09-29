@@ -203,7 +203,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         .primaryButtonBackground; // C31
                                   }
                                   return isDark
-                                      ? const Color(0xFF151012)
+                                      // C107: single-source night (was hex).
+                                      ? AppTheme.night
                                       : Colors.white;
                                 }),
                                 side: BorderSide(
@@ -490,7 +491,10 @@ class _VerifiedNotice extends StatelessWidget {
           Icon(
             Icons.check_circle_outline,
             size: 20,
-            color: AppTheme.primaryButtonBackground,
+            // C107: cream icon in dark (plum-on-night fails contrast).
+            color: isDark
+                ? AppTheme.onPrimaryButton
+                : AppTheme.primaryButtonBackground,
           ),
           const SizedBox(width: 8),
           Expanded(

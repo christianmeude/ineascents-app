@@ -254,22 +254,24 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         if (_selectedDay != null) ...[
           Text(
             _formatDate(_selectedDay!),
-            style: TextStyle(
-              color: titleColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+            // C117: theme ramp (explicit Figtree).
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: titleColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
           ),
           const SizedBox(height: 4),
           Text(
             selectedStatus == null || _isAvailable(selectedStatus)
                 ? 'Available for your event'
                 : 'Unavailable — pick another date',
-            style: TextStyle(
-              color: bodyColor,
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-            ),
+            // C117: theme ramp (explicit Figtree).
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: bodyColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                ),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -301,11 +303,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           // C28: agenda empty state — keeps the panel present.
           Text(
             'Select a date to see details.',
-            style: TextStyle(
-              color: bodyColor,
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-            ),
+            // C117: theme ramp (explicit Figtree).
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: bodyColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                ),
           ),
         ],
       ],

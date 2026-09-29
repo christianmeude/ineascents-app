@@ -176,13 +176,9 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark
-        ? const Color(0xFFFDF4F5)
-        : const Color(0xFF633E50);
-    final secondaryTextColor = isDark
-        ? const Color(0xFFC4ACAC)
-        : const Color(0xFF765867);
+    // C120: single-source text colors (were inline hex).
+    final textColor = CardSurfaces.title(context);
+    final secondaryTextColor = CardSurfaces.body(context);
 
     final currentError =
         _touched['current'] == true ? _currentError : null;
@@ -214,20 +210,22 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 children: [
                   Text(
                     'Change Password',
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.2,
-                    ),
+                    // C120: theme ramp (explicit Figtree).
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: textColor,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Enter your current password, choose a new one, and confirm the 6-digit code.',
-                    style: TextStyle(
-                      color: secondaryTextColor,
-                      fontSize: 13,
-                    ),
+                    // C120: theme ramp (explicit Figtree).
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: secondaryTextColor,
+                          fontSize: 13,
+                        ),
                   ),
                   const SizedBox(height: 16),
                   Container(
@@ -264,6 +262,10 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                             labelText: 'Current password',
                             suffixIcon: IconButton(
                               mouseCursor: SystemMouseCursors.click,
+                              // C120: screen-reader label (parity C108/C110).
+                              tooltip: _obscureCurrent
+                                  ? 'Show password'
+                                  : 'Hide password',
                               onPressed: () => setState(
                                 () => _obscureCurrent = !_obscureCurrent,
                               ),
@@ -292,6 +294,10 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                             labelText: 'New password',
                             suffixIcon: IconButton(
                               mouseCursor: SystemMouseCursors.click,
+                              // C120: screen-reader label (parity C108/C110).
+                              tooltip: _obscureNew
+                                  ? 'Show password'
+                                  : 'Hide password',
                               onPressed: () => setState(
                                 () => _obscureNew = !_obscureNew,
                               ),
@@ -323,6 +329,10 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                             labelText: 'Confirm new password',
                             suffixIcon: IconButton(
                               mouseCursor: SystemMouseCursors.click,
+                              // C120: screen-reader label (parity C108/C110).
+                              tooltip: _obscureConfirm
+                                  ? 'Show password'
+                                  : 'Hide password',
                               onPressed: () => setState(
                                 () => _obscureConfirm = !_obscureConfirm,
                               ),
@@ -379,14 +389,39 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                                 borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                            child: Text(
-                              _sending ? 'Changing…' : 'CHANGE PASSWORD',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
+                            // C120: spinner + label parity with auth screens.
+                            child: _sending
+                                ? const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        height: 16,
+                                        width: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          // C31 parity: cream on plum.
+                                          color: AppTheme.onPrimaryButton,
+                                        ),
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Changing…',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : const Text(
+                                    'CHANGE PASSWORD',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
                           ),
                         ),
                       ],

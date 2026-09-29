@@ -72,9 +72,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // C108: single-source label colors (were inline hex).
     final inputLabelColor = isDark
-        ? const Color(0xFFFDF4F5)
-        : const Color(0xFF6A4053);
+        ? AppTheme.onPrimaryButton
+        : AppTheme.primaryButtonBackground;
 
     return Scaffold(
       backgroundColor:
@@ -158,6 +159,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           autofillHints: const [AutofillHints.password],
                           suffixIcon: IconButton(
                             mouseCursor: SystemMouseCursors.click,
+                            // C108: screen-reader label for the toggle.
+                            tooltip: obscurePassword
+                                ? 'Show password'
+                                : 'Hide password',
                             onPressed: () {
                               setState(() {
                                 obscurePassword = !obscurePassword;
@@ -246,11 +251,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               foregroundColor:
                                   AppTheme.primaryButtonBackground,
                               side: BorderSide(
+                                // C108: single-source border (was inline hex).
                                 color: isDark
-                                    ? const Color(
-                                        0xFFFDF4F5,
-                                      ).withValues(alpha: 0.5)
-                                    : const Color(0xFF6A4053),
+                                    ? AppTheme.onPrimaryButton.withValues(
+                                        alpha: 0.5,
+                                      )
+                                    : AppTheme.primaryButtonBackground,
                                 width: 1.5,
                               ),
                               padding: const EdgeInsets.symmetric(

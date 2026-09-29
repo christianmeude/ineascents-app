@@ -149,22 +149,26 @@ class _OfferingTeaser extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Explore our Offerings',
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              color: CardSurfaces.title(context),
+          // C112: theme type ramp (explicit Figtree) + heading semantics.
+          Semantics(
+            header: true,
+            child: Text(
+              'Explore our Offerings',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: CardSurfaces.title(context),
+                  ),
             ),
           ),
           const SizedBox(height: 6),
           Text(
             'Check your date, then pick a Pax Choice for your event.',
-            style: TextStyle(
-              fontSize: 13,
-              height: 1.4,
-              color: CardSurfaces.body(context),
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: 13,
+                  height: 1.4,
+                  color: CardSurfaces.body(context),
+                ),
           ),
           const SizedBox(height: 14),
           FilledButton(

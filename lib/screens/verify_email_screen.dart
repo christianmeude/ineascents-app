@@ -135,9 +135,10 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // C111: single-source label color (was inline hex).
     final inputLabelColor = isDark
-        ? const Color(0xFFFDF4F5)
-        : const Color(0xFF6A4053);
+        ? AppTheme.onPrimaryButton
+        : AppTheme.primaryButtonBackground;
 
     final emailError =
         _touched['email'] == true ? _emailError(_emailController.text) : null;
@@ -179,11 +180,12 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                           child: Text(
                             'Enter the 6-digit code we emailed you to finish registration.',
                             style: GoogleFonts.figtree(
+                              // C111: single-source helper color (was hex).
                               color: isDark
-                                  ? const Color(
-                                      0xFFFDF4F5,
-                                    ).withValues(alpha: 0.8)
-                                  : const Color(0xFF6A4053),
+                                  ? AppTheme.onPrimaryButton.withValues(
+                                      alpha: 0.8,
+                                    )
+                                  : AppTheme.primaryButtonBackground,
                               fontSize: 14,
                             ),
                           ),
@@ -260,10 +262,11 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                             ),
                             child: _sending
                                 ? const SizedBox(
-                                    height: 16,
-                                    width: 16,
+                                    // C111: 20px spinner matches auth screens.
+                                    height: 20,
+                                    width: 20,
                                     child: CircularProgressIndicator(
-                                      strokeWidth: 2,
+                                      strokeWidth: 2.5,
                                       color: AppTheme.onPrimaryButton,
                                     ),
                                   )
@@ -288,11 +291,12 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                               foregroundColor:
                                   AppTheme.primaryButtonBackground,
                               side: BorderSide(
+                                // C111: single-source border (was inline hex).
                                 color: isDark
-                                    ? const Color(
-                                        0xFFFDF4F5,
-                                      ).withValues(alpha: 0.5)
-                                    : const Color(0xFF6A4053),
+                                    ? AppTheme.onPrimaryButton.withValues(
+                                        alpha: 0.5,
+                                      )
+                                    : AppTheme.primaryButtonBackground,
                                 width: 1.5,
                               ),
                               shape: RoundedRectangleBorder(

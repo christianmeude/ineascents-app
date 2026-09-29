@@ -2245,8 +2245,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           ),
         ],
       );
-    } else if (_currentStep == 4) {
-      // Payment Step
+    } else {
+      // Payment Step (step 4; 2/3 handled above, 5 returns earlier).
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2497,7 +2497,6 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       );
     }
 
-    return Center(child: Text('Step $_currentStep details here'));
   }
 
   Widget _buildMobileContactField({

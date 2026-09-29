@@ -275,12 +275,13 @@ class _DetailStatusChip extends StatelessWidget {
       ),
       child: Text(
         status.toUpperCase(),
-        style: TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.5,
-          color: color,
-        ),
+        // C116: theme ramp (explicit Figtree).
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+              color: color,
+            ),
       ),
     );
   }

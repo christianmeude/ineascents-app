@@ -1493,7 +1493,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     if (status == BookingCheckoutStatus.confirmed) {
       content = _buildCheckoutCard(
         iconData: Icons.check_rounded,
-        iconColor: const Color(0xFF22C55E),
+        iconColor: SuccessCheck.successGreen,
         title: 'Payment Successful',
         messageLines: [
           'Thank you for your booking.',
@@ -1517,7 +1517,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     } else if (status == BookingCheckoutStatus.awaitingAdmin) {
       content = _buildCheckoutCard(
         iconData: Icons.schedule_rounded,
-        iconColor: const Color(0xFFC28A52),
+        iconColor: IneaCalendar.bookedAmber,
         title: 'Awaiting Admin Confirmation',
         messageLines: [
           'Your booking has been received.',
@@ -1534,7 +1534,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     } else if (status == BookingCheckoutStatus.cancelled) {
       content = _buildCheckoutCard(
         iconData: Icons.cancel_rounded,
-        iconColor: const Color(0xFFC28A52),
+        iconColor: IneaCalendar.bookedAmber,
         title: 'Booking Not Completed',
         messageLines: [
           'The payment link expired or the booking was cancelled.',
@@ -1578,7 +1578,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         // P6 (Q8): friendly copy — the raw error stays in logs only.
         content = _buildCheckoutCard(
           iconData: Icons.error_outline_rounded,
-          iconColor: const Color(0xFFC28A52),
+          iconColor: IneaCalendar.bookedAmber,
           title: 'Unable to Submit Booking',
           messageLines: [
             "We couldn't place your booking. Nothing was charged — "
@@ -1593,7 +1593,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       } else {
         content = _buildCheckoutCard(
           iconData: Icons.check_rounded,
-          iconColor: const Color(0xFF22C55E),
+          iconColor: SuccessCheck.successGreen,
           title: 'Booking Submitted',
           messageLines: ['Your booking is being processed.'],
           buttonLabel: 'Done',

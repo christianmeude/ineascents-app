@@ -75,9 +75,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // C109: single-source label color (was inline hex).
     final inputLabelColor = isDark
-        ? const Color(0xFFFDF4F5)
-        : const Color(0xFF6A4053);
+        ? AppTheme.onPrimaryButton
+        : AppTheme.primaryButtonBackground;
 
     return Scaffold(
       backgroundColor:
@@ -117,13 +118,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           child: Text(
                             'Enter your email address to receive a 6-digit reset code.',
                             style: GoogleFonts.figtree(
+                              // C109: single-source helper color (was hex).
                               color: isDark
-                                  ? const Color(
-                                      0xFFFDF4F5,
-                                    ).withValues(alpha: 0.8)
+                                  ? AppTheme.onPrimaryButton.withValues(
+                                      alpha: 0.8,
+                                    )
                                   // C45: full-strength plum in light mode —
                                   // the 0.8 wash drops to ~4.7:1, below AAA.
-                                  : const Color(0xFF6A4053),
+                                  : AppTheme.primaryButtonBackground,
                               fontSize: 14,
                             ),
                           ),
@@ -156,10 +158,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             ),
                             child: _sending
                                 ? const SizedBox(
-                                    height: 16,
-                                    width: 16,
+                                    // C109: 20px spinner matches login/register.
+                                    height: 20,
+                                    width: 20,
                                     child: CircularProgressIndicator(
-                                      strokeWidth: 2,
+                                      strokeWidth: 2.5,
                                       // C31: cream spinner on plum token.
                                       color: AppTheme.onPrimaryButton,
                                     ),
@@ -186,11 +189,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                               foregroundColor:
                                   AppTheme.primaryButtonBackground,
                               side: BorderSide(
+                                // C109: single-source border (was inline hex).
                                 color: isDark
-                                    ? const Color(
-                                        0xFFFDF4F5,
-                                      ).withValues(alpha: 0.5)
-                                    : const Color(0xFF6A4053),
+                                    ? AppTheme.onPrimaryButton.withValues(
+                                        alpha: 0.5,
+                                      )
+                                    : AppTheme.primaryButtonBackground,
                                 width: 1.5,
                               ),
                               shape: RoundedRectangleBorder(

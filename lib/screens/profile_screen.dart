@@ -192,11 +192,12 @@ class _ProfileCard extends StatelessWidget {
               child: Text(
                 firstLetter,
 
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w600,
-                ),
+                // C118: theme ramp (explicit Figtree).
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ),
           ),
@@ -217,11 +218,12 @@ class _ProfileCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
 
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  // C118: theme ramp (explicit Figtree).
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: textColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
 
                 const SizedBox(height: 5),
@@ -232,7 +234,9 @@ class _ProfileCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
 
-                  style: TextStyle(color: secondaryTextColor, fontSize: 12.5),
+                  // C118: theme ramp (explicit Figtree).
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: secondaryTextColor, fontSize: 12.5),
                 ),
               ],
             ),
@@ -400,11 +404,12 @@ class _ThemeToggleTile extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     'Dark theme',
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    // C118: theme ramp (explicit Figtree).
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: textColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
                 Switch.adaptive(
@@ -451,21 +456,15 @@ class _ProfileSettingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // P6 (Q1): dark-aware tile text.
+    // C118: single-source surfaces (were inline hex).
     final isDark = Theme.of(context).brightness == Brightness.dark;
     const primaryColor = AppTheme.primary;
-    final textColor = isDark
-        ? const Color(0xFFFDF4F5)
-        : const Color(0xFF633E50);
-    final secondaryTextColor = isDark
-        ? const Color(0xFFC4ACAC)
-        : const Color(0xFF765867);
+    final textColor = CardSurfaces.title(context);
+    final secondaryTextColor = CardSurfaces.body(context);
 
     final itemColor = isDestructive
-        ? isDark
-              ? const Color(0xFFF0A6B0)
-              // C36: 9.83:1 vs white (was 0xFF9A4F5D at 5.75).
-              : AppTheme.errorOnLight
-        : (isDark ? const Color(0xFFFDF4F5) : primaryColor);
+        ? (isDark ? AppTheme.errorOnDark : AppTheme.errorOnLight)
+        : (isDark ? AppTheme.onPrimaryButton : primaryColor);
 
     return Material(
       color: Colors.transparent,
@@ -514,11 +513,12 @@ class _ProfileSettingTile extends StatelessWidget {
                     Text(
                       title,
 
-                      style: TextStyle(
-                        color: isDestructive ? itemColor : textColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      // C118: theme ramp (explicit Figtree).
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: isDestructive ? itemColor : textColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
 
                     const SizedBox(height: 3),
@@ -527,10 +527,12 @@ class _ProfileSettingTile extends StatelessWidget {
                     if (note != null)
                       Text(
                         note!,
-                        style: TextStyle(
-                          color: secondaryTextColor,
-                          fontSize: 11,
-                        ),
+                        // C118: theme ramp (explicit Figtree).
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: secondaryTextColor,
+                                  fontSize: 11,
+                                ),
                       ),
                   ],
                 ),
@@ -570,9 +572,8 @@ class _SettingDivider extends StatelessWidget {
         height: 1,
         thickness: 0.7,
         // P6 (Q1): visible on solid cards in both themes.
-        color: Theme.of(context).brightness == Brightness.dark
-            ? const Color(0xFF36222C)
-            : const Color(0x4D99868C),
+        // C118: single-source border (was inline hex).
+        color: CardSurfaces.cardBorder(context),
       ),
     );
   }

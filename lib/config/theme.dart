@@ -58,6 +58,9 @@ class AppTheme {
   // holds 9.83:1 vs white (text bar 7:1). Dark mode keeps 0xFFF0A6B0.
   static const Color errorOnLight = Color(0xFF7A2531);
 
+  // C118: dark-mode error text token (was inline hex in profile tile).
+  static const Color errorOnDark = Color(0xFFF0A6B0);
+
   // C57 single-source header/brand fallback stack: Josefin Sans first,
   // system sans after — holds with font-fetch disabled (offline-safe).
   static const List<String> brandFontFallback = [

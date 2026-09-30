@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+
+import 'skeleton_shimmer.dart';
 
 class SkeletonPackageCard extends StatelessWidget {
   const SkeletonPackageCard({super.key});
@@ -7,14 +8,9 @@ class SkeletonPackageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // P6 (Q1): dark-aware shimmer so loading states never flash white.
     // C84: single parent Shimmer — children are plain Containers.
+    // C126: tone resolves through SkeletonShimmer (uniform + muted).
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark ? const Color(0xFF36222C) : const Color(0xFF99868C);
-    final highlight = isDark
-        ? const Color(0xFF5A4450)
-        : const Color(0xFFE8DEE2);
-    return Shimmer.fromColors(
-      baseColor: base,
-      highlightColor: highlight,
+    return SkeletonShimmer(
       child: Container(
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1C1618) : Colors.white,
@@ -86,11 +82,8 @@ class SkeletonPackagesLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // C126: tone resolves through SkeletonShimmer (uniform + muted).
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark ? const Color(0xFF36222C) : const Color(0xFF99868C);
-    final highlight = isDark
-        ? const Color(0xFF5A4450)
-        : const Color(0xFFE8DEE2);
 
     Widget bar({
       required double height,
@@ -107,9 +100,7 @@ class SkeletonPackagesLoading extends StatelessWidget {
       );
     }
 
-    return Shimmer.fromColors(
-      baseColor: base,
-      highlightColor: highlight,
+    return SkeletonShimmer(
       child: Column(
         key: const Key('skeleton_packages_loading'),
         crossAxisAlignment: CrossAxisAlignment.start,

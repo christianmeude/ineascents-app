@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../models/index.dart';
 import '../providers/index.dart';
 import 'card_surfaces.dart';
+import 'skeleton_shimmer.dart';
 
 /// C11: picks the nearest upcoming Booking from a list.
 ///
@@ -79,9 +79,8 @@ class UpcomingBookingSection extends ConsumerWidget {
         return _UpcomingCard(booking: upcoming);
       },
       loading: () => const _LoadingUpcoming(),
-      error: (error, _) => _ErrorUpcoming(
-        onRetry: () => ref.invalidate(bookingsProvider),
-      ),
+      error: (error, _) =>
+          _ErrorUpcoming(onRetry: () => ref.invalidate(bookingsProvider)),
     );
   }
 }
@@ -123,14 +122,12 @@ class _UpcomingCard extends StatelessWidget {
     final status = booking.status ?? 'pending';
     final color = _statusColor(status);
     final date = booking.eventDate?.toString().split(' ')[0] ?? 'N/A';
-    final time = (booking.eventTime ?? '').isEmpty
-        ? null
-        : booking.eventTime;
+    final time = (booking.eventTime ?? '').isEmpty ? null : booking.eventTime;
     final pax = booking.pax == null
         ? 'N/A'
         : booking.pax == 1
-            ? '1 Pax'
-            : '${booking.pax} Pax';
+        ? '1 Pax'
+        : '${booking.pax} Pax';
 
     return _SectionCard(
       child: Column(
@@ -157,9 +154,7 @@ class _UpcomingCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: color.withValues(alpha: 0.22),
-                  ),
+                  border: Border.all(color: color.withValues(alpha: 0.22)),
                 ),
                 child: Text(
                   status.toUpperCase(),
@@ -189,10 +184,7 @@ class _UpcomingCard extends StatelessWidget {
             time == null ? date : '$date · $time',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 12,
-              color: CardSurfaces.body(context),
-            ),
+            style: TextStyle(fontSize: 12, color: CardSurfaces.body(context)),
           ),
           const SizedBox(height: 10),
           Row(
@@ -215,8 +207,7 @@ class _UpcomingCard extends StatelessWidget {
               ),
               if (booking.id != null)
                 TextButton(
-                  onPressed: () =>
-                      context.push('/bookings/${booking.id}'),
+                  onPressed: () => context.push('/bookings/${booking.id}'),
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
@@ -227,10 +218,7 @@ class _UpcomingCard extends StatelessWidget {
                   ),
                   child: const Text(
                     'View',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                 ),
             ],
@@ -289,19 +277,13 @@ class _EmptyUpcoming extends StatelessWidget {
           TextButton(
             onPressed: () => context.go('/packages'),
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: const Text(
               'Explore',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -315,40 +297,31 @@ class _LoadingUpcoming extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Dark-aware shimmer bars (same tokens as SkeletonPackageCard) so the
-    // loading state never flashes white and stays compact for C9.
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark
-        ? const Color(0xFF36222C)
-        : const Color(0xFFE8DEE2);
-    final highlight = isDark
-        ? const Color(0xFF5A4450)
-        : const Color(0xFFFDF4F5);
+    // C126: single parent SkeletonShimmer (was per-bar Shimmer with
+    // divergent tokens) — uniform muted tone, never flashes white.
     Widget bar(double height, double width) {
-      return Shimmer.fromColors(
-        baseColor: base,
-        highlightColor: highlight,
-        child: Container(
-          height: height,
-          width: width,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(6),
-          ),
+      return Container(
+        height: height,
+        width: width,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6),
         ),
       );
     }
 
-    return _SectionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          bar(11, 130),
-          const SizedBox(height: 10),
-          bar(16, double.infinity),
-          const SizedBox(height: 8),
-          bar(12, 170),
-        ],
+    return SkeletonShimmer(
+      child: _SectionCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            bar(11, 130),
+            const SizedBox(height: 10),
+            bar(16, double.infinity),
+            const SizedBox(height: 8),
+            bar(12, 170),
+          ],
+        ),
       ),
     );
   }
@@ -373,28 +346,19 @@ class _ErrorUpcoming extends StatelessWidget {
           Expanded(
             child: Text(
               "We couldn't load your upcoming Booking.",
-              style: TextStyle(
-                fontSize: 12,
-                color: CardSurfaces.body(context),
-              ),
+              style: TextStyle(fontSize: 12, color: CardSurfaces.body(context)),
             ),
           ),
           TextButton(
             onPressed: onRetry,
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: const Text(
               'Retry',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
             ),
           ),
         ],

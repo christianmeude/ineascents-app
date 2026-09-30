@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 import 'responsive_app_shell.dart';
+import 'skeleton_shimmer.dart';
 
 /// C79: booking-flow loading skeleton — teases the booking schedule step
 /// (locked Pax header + calendar card + time/pax rows + event summary +
@@ -19,13 +19,8 @@ class SkeletonBookingFlow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // C126: tone resolves through SkeletonShimmer (uniform + muted).
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark
-        ? const Color(0xFF36222C)
-        : const Color(0xFF99868C);
-    final highlight = isDark
-        ? const Color(0xFF5A4450)
-        : const Color(0xFFE8DEE2);
 
     Widget bar({
       required double height,
@@ -72,9 +67,7 @@ class SkeletonBookingFlow extends StatelessWidget {
           color: isDark ? const Color(0xFF1C1618) : Colors.white,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isDark
-                ? const Color(0xFF36222C)
-                : const Color(0x4D99868C),
+            color: isDark ? const Color(0xFF36222C) : const Color(0x4D99868C),
           ),
         ),
         child: Column(
@@ -119,9 +112,7 @@ class SkeletonBookingFlow extends StatelessWidget {
           color: isDark ? const Color(0xFF1C1618) : Colors.white,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: isDark
-                ? const Color(0xFF36222C)
-                : const Color(0x4D99868C),
+            color: isDark ? const Color(0xFF36222C) : const Color(0x4D99868C),
           ),
         ),
         child: Column(
@@ -170,9 +161,7 @@ class SkeletonBookingFlow extends StatelessWidget {
           color: isDark ? const Color(0xFF1C1618) : Colors.white,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: isDark
-                ? const Color(0xFF36222C)
-                : const Color(0x4D99868C),
+            color: isDark ? const Color(0xFF36222C) : const Color(0x4D99868C),
           ),
         ),
         child: Column(
@@ -206,9 +195,7 @@ class SkeletonBookingFlow extends StatelessWidget {
           color: isDark ? const Color(0xFF1C1618) : Colors.white,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: isDark
-                ? const Color(0xFF36222C)
-                : const Color(0x4D99868C),
+            color: isDark ? const Color(0xFF36222C) : const Color(0x4D99868C),
           ),
         ),
         child: Column(
@@ -244,9 +231,7 @@ class SkeletonBookingFlow extends StatelessWidget {
       );
     }
 
-    return Shimmer.fromColors(
-      baseColor: base,
-      highlightColor: highlight,
+    return SkeletonShimmer(
       child: Column(
         key: const Key('skeleton_booking_flow'),
         crossAxisAlignment: CrossAxisAlignment.stretch,

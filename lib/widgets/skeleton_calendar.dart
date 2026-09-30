@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 import 'responsive_app_shell.dart';
+import 'skeleton_shimmer.dart';
 
 /// C58: calendar loading skeleton — mirrors the Availability card +
 /// agenda column so loading never flashes a spinner or stale chrome.
@@ -17,13 +17,8 @@ class SkeletonCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // C126: tone resolves through SkeletonShimmer (uniform + muted).
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark
-        ? const Color(0xFF36222C)
-        : const Color(0xFF99868C);
-    final highlight = isDark
-        ? const Color(0xFF5A4450)
-        : const Color(0xFFE8DEE2);
 
     Widget bar({
       required double height,
@@ -111,9 +106,7 @@ class SkeletonCalendar extends StatelessWidget {
           color: isDark ? const Color(0xFF1C1618) : Colors.white,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isDark
-                ? const Color(0xFF36222C)
-                : const Color(0x4D99868C),
+            color: isDark ? const Color(0xFF36222C) : const Color(0x4D99868C),
           ),
         ),
         child: Column(
@@ -170,17 +163,15 @@ class SkeletonCalendar extends StatelessWidget {
       );
     }
 
-    return Shimmer.fromColors(
-      baseColor: base,
-      highlightColor: highlight,
+    return SkeletonShimmer(
       child: Column(
         key: const Key('skeleton_calendar'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           LayoutBuilder(
             builder: (context, constraints) {
-              final isDesktop = constraints.maxWidth >=
-                  ResponsiveAppShell.tabletBreakpoint;
+              final isDesktop =
+                  constraints.maxWidth >= ResponsiveAppShell.tabletBreakpoint;
               if (isDesktop) {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,

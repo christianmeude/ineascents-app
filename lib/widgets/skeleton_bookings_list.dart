@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+
+import 'skeleton_shimmer.dart';
 
 /// C79: bookings-list loading skeleton — teases the My Bookings layout
 /// (TabHeader + booking cards) so loading never flashes a spinner.
@@ -16,13 +17,8 @@ class SkeletonBookingsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // C126: tone resolves through SkeletonShimmer (uniform + muted).
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark
-        ? const Color(0xFF36222C)
-        : const Color(0xFF99868C);
-    final highlight = isDark
-        ? const Color(0xFF5A4450)
-        : const Color(0xFFE8DEE2);
 
     Widget bar({
       required double height,
@@ -41,7 +37,11 @@ class SkeletonBookingsList extends StatelessWidget {
       );
     }
 
-    Widget box({required double width, required double height, double radius = 10}) {
+    Widget box({
+      required double width,
+      required double height,
+      double radius = 10,
+    }) {
       return Container(
         width: width,
         height: height,
@@ -67,18 +67,14 @@ class SkeletonBookingsList extends StatelessWidget {
                   height: 9,
                   width: 70,
                   radius: 4,
-                  key: Key(
-                    'skeleton_booking_card_${card}_detail_${row}_label',
-                  ),
+                  key: Key('skeleton_booking_card_${card}_detail_${row}_label'),
                 ),
                 const SizedBox(height: 2),
                 bar(
                   height: 12,
                   width: double.infinity,
                   radius: 6,
-                  key: Key(
-                    'skeleton_booking_card_${card}_detail_${row}_value',
-                  ),
+                  key: Key('skeleton_booking_card_${card}_detail_${row}_value'),
                 ),
               ],
             ),
@@ -96,9 +92,7 @@ class SkeletonBookingsList extends StatelessWidget {
           color: isDark ? const Color(0xFF1C1618) : Colors.white,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: isDark
-                ? const Color(0xFF36222C)
-                : const Color(0x4D99868C),
+            color: isDark ? const Color(0xFF36222C) : const Color(0x4D99868C),
           ),
         ),
         child: Column(
@@ -146,8 +140,7 @@ class SkeletonBookingsList extends StatelessWidget {
             const SizedBox(height: 18),
             // Price chip row (12px label + price bar).
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(14),
@@ -174,9 +167,7 @@ class SkeletonBookingsList extends StatelessWidget {
       );
     }
 
-    return Shimmer.fromColors(
-      baseColor: base,
-      highlightColor: highlight,
+    return SkeletonShimmer(
       child: Column(
         key: const Key('skeleton_bookings_list'),
         crossAxisAlignment: CrossAxisAlignment.stretch,

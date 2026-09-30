@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../config/theme.dart';
 import '../providers/index.dart';
@@ -93,15 +92,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       // C125: skeleton-exclusive placeholder bars (no TabHeader
                       // texts while loading); metrics nod to TabHeader title
                       // (28/32) + count (13) without pretending pixel parity.
-                      Shimmer.fromColors(
-                        baseColor:
-                            Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFF36222C)
-                            : const Color(0xFF99868C),
-                        highlightColor:
-                            Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFF5A4450)
-                            : const Color(0xFFE8DEE2),
+                      // C126: tone via SkeletonShimmer (uniform + muted).
+                      SkeletonShimmer(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

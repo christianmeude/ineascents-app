@@ -61,9 +61,11 @@ class TabHeader extends StatelessWidget {
     // C73: Great Vibes ships Regular 400 only — w400 (no synthetic
     // bold), neutral tracking (scripts kern naturally), natural line
     // height (script descenders clip under the old 1.15 override).
+    // C127: owner-directed bolden — w700 faux-bold on the script so
+    // screen titles (Our Collections, Availability, …) carry weight.
     final titleStyle = GoogleFonts.greatVibes(
       fontSize: titleSizeFor(MediaQuery.sizeOf(context).width),
-      fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.w700,
       letterSpacing: titleLetterSpacing,
       color: CardSurfaces.title(context),
     ).copyWith(fontFamilyFallback: titleFallback);

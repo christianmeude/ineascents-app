@@ -27,8 +27,9 @@ void main() {
       expect(style.fontFamily, contains('GreatVibes'));
       expect(style.fontFamilyFallback, TabHeader.titleFallback);
       expect(style.fontFamilyFallback!.first, 'Great Vibes');
-      // Script ships Regular 400 only (no synthetic bold).
-      expect(style.fontWeight, FontWeight.w400);
+      // C127: owner-directed bolden — w700 faux-bold on the script
+      // (was w400; the family ships Regular 400 only).
+      expect(style.fontWeight, FontWeight.w700);
     });
 
     testWidgets('TopNavBar brand INEA renders Josefin Sans family', (

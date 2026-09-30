@@ -196,7 +196,8 @@ void main() {
       expect(tester.takeException(), isNull);
 
       final title = tester.widget<Text>(find.text('My Bookings'));
-      expect(title.style?.fontWeight, FontWeight.w400);
+      // C127: owner-directed bolden (was w400, script ships 400 only).
+      expect(title.style?.fontWeight, FontWeight.w700);
       expect(title.style?.letterSpacing, 0);
       expect(title.style?.fontFamilyFallback, TabHeader.titleFallback);
       expect(title.style?.fontFamilyFallback, contains('Great Vibes'));

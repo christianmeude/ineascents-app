@@ -40,11 +40,14 @@ class SkeletonCalendar extends StatelessWidget {
       );
     }
 
+    // C122: 42px cells + 10px gaps = 52px pitch, matching TableCalendar
+    // rowHeight — and fitting the 296px card interior at 360px screens
+    // (was 36+10=46, drifting 6px per row).
     Widget dayCell(int day) {
       return Container(
         key: Key('skeleton_day_cell_$day'),
-        width: 36,
-        height: 36,
+        width: 42,
+        height: 42,
         decoration: const BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
@@ -57,8 +60,8 @@ class SkeletonCalendar extends StatelessWidget {
     Widget leadingCell(int slot) {
       return SizedBox(
         key: Key('skeleton_leading_cell_$slot'),
-        width: 36,
-        height: 36,
+        width: 42,
+        height: 42,
       );
     }
 
@@ -97,10 +100,11 @@ class SkeletonCalendar extends StatelessWidget {
         for (int s = 0; s < leading; s++) leadingCell(s),
         for (int d = 1; d <= daysInMonth; d++) dayCell(d),
         for (int t = totalCells; t < paddedCells; t++)
-          const SizedBox(width: 36, height: 36),
+          const SizedBox(width: 42, height: 42),
       ];
       final rowCount = paddedCells ~/ 7;
       return Container(
+        key: const Key('skeleton_calendar_card'),
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
         decoration: BoxDecoration(
@@ -126,11 +130,17 @@ class SkeletonCalendar extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            // Weekday header mirror: 7 labels.
-            Row(
-              key: const Key('skeleton_weekday_header'),
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [for (int i = 0; i < 7; i++) weekdayLabel()],
+            // Weekday header mirror: 7 labels in a 22px row, matching
+            // TableCalendar daysOfWeekHeight.
+            SizedBox(
+              height: 22,
+              child: Center(
+                child: Row(
+                  key: const Key('skeleton_weekday_header'),
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [for (int i = 0; i < 7; i++) weekdayLabel()],
+                ),
+              ),
             ),
             const SizedBox(height: 6),
             for (int row = 0; row < rowCount; row++) ...[
@@ -147,12 +157,15 @@ class SkeletonCalendar extends StatelessWidget {
 
     // C85: empty-state tease — real empty agenda is text-only
     // ('Select a date to see details.'); no pill CTA without a date.
+    // C122: two bars — the real line wraps to two at mobile widths.
     Widget agendaColumn() {
       return Column(
         key: const Key('skeleton_agenda'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           bar(height: 12, width: 220),
+          const SizedBox(height: 6),
+          bar(height: 12, width: 160),
         ],
       );
     }

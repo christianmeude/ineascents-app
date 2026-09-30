@@ -58,7 +58,7 @@ class TabHeader extends StatelessWidget {
     // C41 §5 B: explicit fallback stacks hold with font-fetch disabled.
     // (copyWith AFTER the GoogleFonts call — the package overwrites
     // fontFamilyFallback internally.)
-    // C73: Great Vibes ships Regular 400 only — w400 (no synthetic
+    // C73: Great Vibes ships Regular 400 only — was w400 (no synthetic
     // bold), neutral tracking (scripts kern naturally), natural line
     // height (script descenders clip under the old 1.15 override).
     // C127: owner-directed bolden — w700 faux-bold on the script so

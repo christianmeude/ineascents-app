@@ -81,23 +81,22 @@ void main() {
             componentHeight(tester, find.byKey(const Key('offering_hero')), 'hero');
         final rowH = componentHeight(
             tester, find.byKey(const Key('pax_choice_50')), 'row');
-        final headerH = componentHeight(
-            tester, find.byType(TabHeader).first, 'header');
 
         await pumpMirror(tester, size);
         final mirrorHeroH = componentHeight(
             tester, find.byKey(const Key('skeleton_offering_hero')), 'mirror hero');
         final mirrorRowH = componentHeight(
             tester, find.byKey(const Key('skeleton_pax_row_0')), 'mirror row');
-        final mirrorHeaderH = componentHeight(
-            tester, find.byType(TabHeader).first, 'mirror header');
 
         expect(mirrorHeroH, moreOrLessEquals(heroH, epsilon: 24),
             reason: 'hero $heroH vs $mirrorHeroH @${size.width}');
         expect(mirrorRowH, moreOrLessEquals(rowH, epsilon: 24),
             reason: 'row $rowH vs $mirrorRowH @${size.width}');
-        expect(mirrorHeaderH, moreOrLessEquals(headerH, epsilon: 24),
-            reason: 'header $headerH vs $mirrorHeaderH @${size.width}');
+        // C124: skeleton-exclusive — placeholder bars, zero header texts.
+        expect(find.text('Our Collections'), findsNothing);
+        expect(find.text('Discover your perfect scent.'), findsNothing);
+        expect(find.byKey(const Key('skeleton_collections_header')),
+            findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }

@@ -29,6 +29,7 @@ class _PackagesScreenState extends ConsumerState<PackagesScreen> {
     // ============================================================
 
     final textColor = CardSurfaces.title(context);
+    final isInitialLoading = packagesAsync.isLoading && !packagesAsync.hasValue;
 
     // P7: no explicit color — the theme scaffold color (light cream /
     // dark night) is the background.
@@ -64,19 +65,20 @@ class _PackagesScreenState extends ConsumerState<PackagesScreen> {
                     // ==================================================
                     // PAGE TITLE (C42: unified header, trailing empty)
                     // ==================================================
-                    const TabHeader(
-                      title: 'Our Collections',
-                      count: 'Discover your perfect scent.',
-                    ),
-
-                    const SizedBox(height: 20),
+                    if (!isInitialLoading) ...[
+                      const TabHeader(
+                        title: 'Our Collections',
+                        count: 'Discover your perfect scent.',
+                      ),
+                      const SizedBox(height: 20),
+                    ],
 
                     // C60: Q9 retired — reopening a draft routes to the flow
                     // itself at its stored stage.
 
                     // C53: the calendar reroute retains the draft date — say
                     // so, and forward it with every Pax Choice row below.
-                    if (widget.initialDate != null) ...[
+                    if (widget.initialDate != null && !isInitialLoading) ...[
                       _CarriedDateBanner(date: widget.initialDate!),
                       const SizedBox(height: 12),
                     ],
@@ -89,8 +91,8 @@ class _PackagesScreenState extends ConsumerState<PackagesScreen> {
                       builder: (context) {
                         // Initial load only: reloads keep stale content
                         // (no skeleton flash) until fresh data lands.
-                        final isInitialLoading =
-                            packagesAsync.isLoading && !packagesAsync.hasValue;
+                        // C124: reuse the outer isInitialLoading so the
+                        // header gate above and the crossfade never drift.
                         final content = packagesAsync.when(
                           data: (packages) {
                             if (packages.isEmpty) {
@@ -253,10 +255,10 @@ class _CarriedDateBanner extends StatelessWidget {
               'Showing for ${formatDateParam(date)} — carried from the calendar.',
               // C113: theme ramp (explicit Figtree).
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: CardSurfaces.title(context),
-                  ),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: CardSurfaces.title(context),
+              ),
             ),
           ),
         ],
@@ -286,9 +288,7 @@ class _EmptyPackages extends StatelessWidget {
       decoration: BoxDecoration(
         color: CardSurfaces.cardBg(context),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: CardSurfaces.cardBorder(context),
-        ),
+        border: Border.all(color: CardSurfaces.cardBorder(context)),
       ),
 
       child: Column(
@@ -302,10 +302,10 @@ class _EmptyPackages extends StatelessWidget {
             textAlign: TextAlign.center,
             // C113: theme ramp (explicit Figtree).
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: textColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: textColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
           ),
 
           const SizedBox(height: 6),
@@ -314,7 +314,9 @@ class _EmptyPackages extends StatelessWidget {
             'Please check back again later.',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: secondaryTextColor, fontSize: 13),
+              color: secondaryTextColor,
+              fontSize: 13,
+            ),
           ),
         ],
       ),

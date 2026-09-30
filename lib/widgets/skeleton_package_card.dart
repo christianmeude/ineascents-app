@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import 'tab_header.dart';
-
 class SkeletonPackageCard extends StatelessWidget {
   const SkeletonPackageCard({super.key});
   @override
@@ -10,9 +8,7 @@ class SkeletonPackageCard extends StatelessWidget {
     // P6 (Q1): dark-aware shimmer so loading states never flash white.
     // C84: single parent Shimmer — children are plain Containers.
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark
-        ? const Color(0xFF36222C)
-        : const Color(0xFF99868C);
+    final base = isDark ? const Color(0xFF36222C) : const Color(0xFF99868C);
     final highlight = isDark
         ? const Color(0xFF5A4450)
         : const Color(0xFFE8DEE2);
@@ -41,8 +37,7 @@ class SkeletonPackageCard extends StatelessWidget {
                   topLeft: Radius.circular(12),
                   topRight: Radius.circular(12),
                 ),
-                child:
-                    Container(width: double.infinity, color: Colors.white),
+                child: Container(width: double.infinity, color: Colors.white),
               ),
             ),
             // Content skeleton
@@ -92,9 +87,7 @@ class SkeletonPackagesLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark
-        ? const Color(0xFF36222C)
-        : const Color(0xFF99868C);
+    final base = isDark ? const Color(0xFF36222C) : const Color(0xFF99868C);
     final highlight = isDark
         ? const Color(0xFF5A4450)
         : const Color(0xFFE8DEE2);
@@ -121,16 +114,15 @@ class SkeletonPackagesLoading extends StatelessWidget {
         key: const Key('skeleton_packages_loading'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // C121: real TabHeader — pixel-identical by construction, so the
-          // header can never drift from the loaded screen again.
-          const Column(
-            key: Key('skeleton_collections_header'),
+          // C124: skeleton-exclusive header placeholder (key kept for
+          // compat) — shimmer bars only, zero TabHeader texts.
+          Column(
+            key: const Key('skeleton_collections_header'),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TabHeader(
-                title: 'Our Collections',
-                count: 'Discover your perfect scent.',
-              ),
+              bar(height: 22, width: 200, radius: 6),
+              const SizedBox(height: 8),
+              bar(height: 13, width: 140, radius: 6),
             ],
           ),
           const SizedBox(height: 20),
@@ -174,19 +166,22 @@ class SkeletonPackagesLoading extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             bar(
-                                height: wide ? 22.0 : 18.0,
-                                width: double.infinity,
-                                radius: 6),
+                              height: wide ? 22.0 : 18.0,
+                              width: double.infinity,
+                              radius: 6,
+                            ),
                             const SizedBox(height: 8),
                             bar(
-                                height: wide ? 16.0 : 14.0,
-                                width: 140,
-                                radius: 6),
+                              height: wide ? 16.0 : 14.0,
+                              width: 140,
+                              radius: 6,
+                            ),
                             const SizedBox(height: 8),
                             bar(
-                                height: wide ? 13.0 : 12.0,
-                                width: double.infinity,
-                                radius: 6),
+                              height: wide ? 13.0 : 12.0,
+                              width: double.infinity,
+                              radius: 6,
+                            ),
                           ],
                         ),
                       ),
@@ -209,7 +204,9 @@ class SkeletonPackagesLoading extends StatelessWidget {
                   key: Key('skeleton_pax_row_$i'),
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(
-                      horizontal: 16, vertical: wide ? 16.0 : 12.0),
+                    horizontal: 16,
+                    vertical: wide ? 16.0 : 12.0,
+                  ),
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF1C1618) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -221,14 +218,16 @@ class SkeletonPackagesLoading extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             bar(
-                                height: wide ? 16.0 : 15.0,
-                                width: 140,
-                                radius: 6),
+                              height: wide ? 16.0 : 15.0,
+                              width: 140,
+                              radius: 6,
+                            ),
                             const SizedBox(height: 6),
                             bar(
-                                height: wide ? 14.0 : 13.0,
-                                width: 90,
-                                radius: 6),
+                              height: wide ? 14.0 : 13.0,
+                              width: 90,
+                              radius: 6,
+                            ),
                           ],
                         ),
                       ),
@@ -249,13 +248,12 @@ class SkeletonPackagesLoading extends StatelessWidget {
                 return GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        mainAxisExtent: 78,
-                      ),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    mainAxisExtent: 78,
+                  ),
                   itemCount: 4,
                   itemBuilder: (context, i) => row(i),
                 );

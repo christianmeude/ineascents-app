@@ -60,6 +60,21 @@ class _SplashScreenState extends State<SplashScreen>
     }
   }
 
+  // C128: honor reduced motion — jump to the end state instead of
+  // playing the 2.2s entrance when animations are disabled.
+  bool _motionResolved = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_motionResolved) {
+      _motionResolved = true;
+      if (MediaQuery.disableAnimationsOf(context)) {
+        _animationController.value = 1.0;
+      }
+    }
+  }
+
   @override
   void dispose() {
     _animationController.dispose();
@@ -81,21 +96,27 @@ class _SplashScreenState extends State<SplashScreen>
           return Stack(
             children: [
               // ========================================================
-              // BACKGROUND
+              // BACKGROUND (C128: decorative — excluded from semantics;
+              // Positioned.fill: bare DecoratedBox would collapse to 0x0
+              // where Container expanded to fill)
               // ========================================================
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFFF1E3D3), // Nude/Peach
-                      Color(0xFFE4C3C7),
-                      Color(0xFFC7A2AE),
-                      Color(0xFF90697B),
-                      Color(0xFF653A4C), // Plum
-                    ],
-                    stops: [0.0, 0.3, 0.55, 0.8, 1.0],
+              const Positioned.fill(
+                child: ExcludeSemantics(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xFFF1E3D3), // Nude/Peach
+                          Color(0xFFE4C3C7),
+                          Color(0xFFC7A2AE),
+                          Color(0xFF90697B),
+                          Color(0xFF653A4C), // Plum
+                        ],
+                        stops: [0.0, 0.3, 0.55, 0.8, 1.0],
+                      ),
+                    ),
                   ),
                 ),
               ),

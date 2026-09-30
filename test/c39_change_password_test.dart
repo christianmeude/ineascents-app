@@ -168,7 +168,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('profile Change Password tile navigates to the route', (
+  testWidgets('profile Change Password tile opens bottom sheet on narrow', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(360, 800);
@@ -206,7 +206,11 @@ void main() {
     await tester.tap(find.text('Change Password'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(ChangePasswordScreen), findsOneWidget);
+    // C149: narrow (<768px) presents the shared sheet with the same form —
+    // the route is not pushed.
+    expect(find.byType(ChangePasswordScreen), findsNothing);
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(find.byKey(const Key('change_password_current')), findsOneWidget);
     expect(find.byKey(const Key('change_password_submit')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

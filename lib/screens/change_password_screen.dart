@@ -51,15 +51,102 @@ class ChangePasswordValidators {
   }
 }
 
-class ChangePasswordScreen extends ConsumerStatefulWidget {
+class ChangePasswordScreen extends ConsumerWidget {
   const ChangePasswordScreen({super.key});
 
+  /// Shared flow blurb — route header and mobile sheet subtitle.
+  static const flowDescription =
+      'Enter your current password, choose a new one, and confirm the 6-digit code.';
+
   @override
-  ConsumerState<ChangePasswordScreen> createState() =>
-      _ChangePasswordScreenState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    // C149: header + card mirror Edit Profile (uniformity); the form
+    // itself is shared with the mobile sheet.
+    // C120: single-source text colors (were inline hex).
+    final textColor = CardSurfaces.title(context);
+    final secondaryTextColor = CardSurfaces.body(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => context.pop(),
+        ),
+        title: const Text('Change Password'),
+        centerTitle: false,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            // C40: clamp overscroll on mobile (<768px); SDK default
+            // (stretch Android / bounce iOS) displaced content past edge.
+            physics: MobileClampScroll.physicsOf(context),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Change Password',
+                    // C120: theme ramp (explicit Figtree).
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: textColor,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    ChangePasswordScreen.flowDescription,
+                    // C120: theme ramp (explicit Figtree).
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: secondaryTextColor,
+                          fontSize: 13,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: CardSurfaces.cardBg(context),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: CardSurfaces.cardBorder(context),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: CardSurfaces.plum.withValues(alpha: 0.08),
+                          blurRadius: 18,
+                          offset: const Offset(0, 7),
+                        ),
+                      ],
+                    ),
+                    child: const ChangePasswordForm(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
+/// C149: the change-password form without Scaffold/chrome — rendered inside
+/// the route card above and inside the mobile bottom sheet.
+class ChangePasswordForm extends ConsumerStatefulWidget {
+  const ChangePasswordForm({super.key});
+
+  @override
+  ConsumerState<ChangePasswordForm> createState() =>
+      _ChangePasswordFormState();
+}
+
+class _ChangePasswordFormState extends ConsumerState<ChangePasswordForm> {
   final _currentController = TextEditingController();
   final _newController = TextEditingController();
   final _confirmController = TextEditingController();
@@ -116,6 +203,15 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> _done(String message) async {
+    // C149: clear the busy flag BEFORE popping — the PopScope below
+    // (canPop: !_sending) would veto the success pop otherwise.
+    if (mounted) setState(() => _sending = false);
+    if (!mounted) return;
+    _snack(message);
+    Navigator.of(context).maybePop();
+  }
+
   Future<void> _submit() async {
     setState(() {
       _touched['current'] = true;
@@ -149,8 +245,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
         ),
       );
       if (!mounted) return;
-      _snack('Password changed.');
-      Navigator.of(context).maybePop();
+      await _done('Password changed.');
     } on DioException catch (e) {
       setState(() => _formError = authErrorCopy(e));
     } finally {
@@ -176,10 +271,6 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // C120: single-source text colors (were inline hex).
-    final textColor = CardSurfaces.title(context);
-    final secondaryTextColor = CardSurfaces.body(context);
-
     final currentError =
         _touched['current'] == true ? _currentError : null;
     final newError = _touched['new'] == true ? _newError : null;
@@ -187,251 +278,182 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
         _touched['confirm'] == true ? _confirmError : null;
     final codeError = _touched['code'] == true ? _codeError : null;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text('Change Password'),
-        centerTitle: false,
-      ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            // C40: clamp overscroll on mobile (<768px); SDK default
-            // (stretch Android / bounce iOS) displaced content past edge.
-            physics: MobileClampScroll.physicsOf(context),
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 600),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Change Password',
-                    // C120: theme ramp (explicit Figtree).
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: textColor,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.2,
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Enter your current password, choose a new one, and confirm the 6-digit code.',
-                    // C120: theme ramp (explicit Figtree).
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: secondaryTextColor,
-                          fontSize: 13,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: CardSurfaces.cardBg(context),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: CardSurfaces.cardBorder(context),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: CardSurfaces.plum.withValues(alpha: 0.08),
-                          blurRadius: 18,
-                          offset: const Offset(0, 7),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (_formError != null) ...[
-                          FormErrorSummary(message: _formError!),
-                          const SizedBox(height: 12),
-                        ],
-                        TextFormField(
-                          key: const Key('change_password_current'),
-                          controller: _currentController,
-                          obscureText: _obscureCurrent,
-                          textInputAction: TextInputAction.next,
-                          autofillHints: const [AutofillHints.password],
-                          decoration: InputDecoration(
-                            labelText: 'Current password',
-                            suffixIcon: IconButton(
-                              mouseCursor: SystemMouseCursors.click,
-                              // C120: screen-reader label (parity C108/C110).
-                              tooltip: _obscureCurrent
-                                  ? 'Show password'
-                                  : 'Hide password',
-                              onPressed: () => setState(
-                                () => _obscureCurrent = !_obscureCurrent,
-                              ),
-                              icon: Icon(
-                                _obscureCurrent
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                size: 18,
-                              ),
-                            ),
-                          ),
-                          onChanged: (_) => _touch('current'),
-                        ),
-                        InlineFieldError(
-                          key: const Key('change_password_current_error'),
-                          message: currentError,
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          key: const Key('change_password_new'),
-                          controller: _newController,
-                          obscureText: _obscureNew,
-                          textInputAction: TextInputAction.next,
-                          autofillHints: const [AutofillHints.newPassword],
-                          decoration: InputDecoration(
-                            labelText: 'New password',
-                            suffixIcon: IconButton(
-                              mouseCursor: SystemMouseCursors.click,
-                              // C120: screen-reader label (parity C108/C110).
-                              tooltip: _obscureNew
-                                  ? 'Show password'
-                                  : 'Hide password',
-                              onPressed: () => setState(
-                                () => _obscureNew = !_obscureNew,
-                              ),
-                              icon: Icon(
-                                _obscureNew
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                size: 18,
-                              ),
-                            ),
-                          ),
-                          onChanged: (_) {
-                            _touch('new');
-                            if (_touched['confirm'] == true) setState(() {});
-                          },
-                        ),
-                        InlineFieldError(
-                          key: const Key('change_password_new_error'),
-                          message: newError,
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          key: const Key('change_password_confirm'),
-                          controller: _confirmController,
-                          obscureText: _obscureConfirm,
-                          textInputAction: TextInputAction.next,
-                          autofillHints: const [AutofillHints.newPassword],
-                          decoration: InputDecoration(
-                            labelText: 'Confirm new password',
-                            suffixIcon: IconButton(
-                              mouseCursor: SystemMouseCursors.click,
-                              // C120: screen-reader label (parity C108/C110).
-                              tooltip: _obscureConfirm
-                                  ? 'Show password'
-                                  : 'Hide password',
-                              onPressed: () => setState(
-                                () => _obscureConfirm = !_obscureConfirm,
-                              ),
-                              icon: Icon(
-                                _obscureConfirm
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                size: 18,
-                              ),
-                            ),
-                          ),
-                          onChanged: (_) => _touch('confirm'),
-                        ),
-                        InlineFieldError(
-                          key: const Key('change_password_confirm_error'),
-                          message: confirmError,
-                        ),
-                        const SizedBox(height: 16),
-                        GatedCodeSection(
-                          codeSent: _codeSent,
-                          field: TextFormField(
-                            key: const Key('change_password_code'),
-                            controller: _codeController,
-                            keyboardType: TextInputType.number,
-                            textInputAction: TextInputAction.done,
-                            autofillHints: const [AutofillHints.oneTimeCode],
-                            decoration: const InputDecoration(
-                              labelText: '6-digit code',
-                              hintText: '123456',
-                            ),
-                            onChanged: (_) => _touch('code'),
-                          ),
-                          sending: _sending,
-                          onResend: _resend,
-                          resendKey: const Key('change_password_resend'),
-                        ),
-                        InlineFieldError(
-                          key: const Key('change_password_code_error'),
-                          message: codeError,
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 44,
-                          child: ElevatedButton(
-                            key: const Key('change_password_submit'),
-                            onPressed: _sending ? null : _submit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  AppTheme.primaryButtonBackground,
-                              foregroundColor: AppTheme.onPrimaryButton,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                            ),
-                            // C120: spinner + label parity with auth screens.
-                            child: _sending
-                                ? const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(
-                                        height: 16,
-                                        width: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          // C31 parity: cream on plum.
-                                          color: AppTheme.onPrimaryButton,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Changing…',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 1.2,
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : const Text(
-                                    'CHANGE PASSWORD',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 1.2,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+    // C149: dismiss-lock while busy (grill Q4) — back/drag refused
+    // mid-request, allowed when idle. Covers both sheet and route.
+    return PopScope(
+      canPop: !_sending,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_formError != null) ...[
+            FormErrorSummary(message: _formError!),
+            const SizedBox(height: 12),
+          ],
+          TextFormField(
+            key: const Key('change_password_current'),
+            controller: _currentController,
+            obscureText: _obscureCurrent,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.password],
+            decoration: InputDecoration(
+              labelText: 'Current password',
+              suffixIcon: IconButton(
+                mouseCursor: SystemMouseCursors.click,
+                // C120: screen-reader label (parity C108/C110).
+                tooltip:
+                    _obscureCurrent ? 'Show password' : 'Hide password',
+                onPressed: () =>
+                    setState(() => _obscureCurrent = !_obscureCurrent),
+                icon: Icon(
+                  _obscureCurrent
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  size: 18,
+                ),
               ),
             ),
+            onChanged: (_) => _touch('current'),
           ),
-        ),
+          InlineFieldError(
+            key: const Key('change_password_current_error'),
+            message: currentError,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            key: const Key('change_password_new'),
+            controller: _newController,
+            obscureText: _obscureNew,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.newPassword],
+            decoration: InputDecoration(
+              labelText: 'New password',
+              suffixIcon: IconButton(
+                mouseCursor: SystemMouseCursors.click,
+                // C120: screen-reader label (parity C108/C110).
+                tooltip: _obscureNew ? 'Show password' : 'Hide password',
+                onPressed: () =>
+                    setState(() => _obscureNew = !_obscureNew),
+                icon: Icon(
+                  _obscureNew
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  size: 18,
+                ),
+              ),
+            ),
+            onChanged: (_) {
+              _touch('new');
+              if (_touched['confirm'] == true) setState(() {});
+            },
+          ),
+          InlineFieldError(
+            key: const Key('change_password_new_error'),
+            message: newError,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            key: const Key('change_password_confirm'),
+            controller: _confirmController,
+            obscureText: _obscureConfirm,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.newPassword],
+            decoration: InputDecoration(
+              labelText: 'Confirm new password',
+              suffixIcon: IconButton(
+                mouseCursor: SystemMouseCursors.click,
+                // C120: screen-reader label (parity C108/C110).
+                tooltip: _obscureConfirm ? 'Show password' : 'Hide password',
+                onPressed: () =>
+                    setState(() => _obscureConfirm = !_obscureConfirm),
+                icon: Icon(
+                  _obscureConfirm
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  size: 18,
+                ),
+              ),
+            ),
+            onChanged: (_) => _touch('confirm'),
+          ),
+          InlineFieldError(
+            key: const Key('change_password_confirm_error'),
+            message: confirmError,
+          ),
+          const SizedBox(height: 16),
+          GatedCodeSection(
+            codeSent: _codeSent,
+            field: TextFormField(
+              key: const Key('change_password_code'),
+              controller: _codeController,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.oneTimeCode],
+              decoration: const InputDecoration(
+                labelText: '6-digit code',
+                hintText: '123456',
+              ),
+              onChanged: (_) => _touch('code'),
+            ),
+            sending: _sending,
+            onResend: _resend,
+            resendKey: const Key('change_password_resend'),
+          ),
+          InlineFieldError(
+            key: const Key('change_password_code_error'),
+            message: codeError,
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: ElevatedButton(
+              key: const Key('change_password_submit'),
+              onPressed: _sending ? null : _submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryButtonBackground,
+                foregroundColor: AppTheme.onPrimaryButton,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              // C120: spinner + label parity with auth screens.
+              child: _sending
+                  ? const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            // C31 parity: cream on plum.
+                            color: AppTheme.onPrimaryButton,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Changing…',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
+                    )
+                  : const Text(
+                      'CHANGE PASSWORD',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }

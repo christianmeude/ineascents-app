@@ -6,6 +6,7 @@ import '../config/theme.dart';
 import '../providers/index.dart';
 import '../widgets/index.dart';
 import 'edit_profile_screen.dart';
+import 'change_password_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -346,9 +347,20 @@ class _SettingsColumn extends StatelessWidget {
               _ProfileSettingTile(
                 icon: Icons.lock_outline_rounded,
                 title: 'Change Password',
-                // C39: plain navigation to the scaffolded
-                // /profile/password route; C15 wires submit.
-                onTap: () => context.push('/profile/password'),
+                // C149: mobile (<768px) opens the shared bottom sheet with
+                // the same form; wide keeps the /profile/password route.
+                onTap: () {
+                  if (isNarrowSheet(context)) {
+                    showProfileSheet<void>(
+                      context,
+                      title: 'Change Password',
+                      subtitle: ChangePasswordScreen.flowDescription,
+                      child: const ChangePasswordForm(),
+                    );
+                  } else {
+                    context.push('/profile/password');
+                  }
+                },
               ),
 
               const _SettingDivider(),

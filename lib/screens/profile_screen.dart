@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../config/theme.dart';
 import '../providers/index.dart';
 import '../widgets/index.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -260,8 +261,21 @@ class _ProfileCard extends StatelessWidget {
 
               icon: Icon(Icons.edit_outlined, color: textColor, size: 18),
 
-              // C38: plain navigation to the scaffolded edit form.
-              onPressed: () => context.push('/profile/edit'),
+              // C148: mobile (<768px) opens the shared bottom sheet with
+              // the same form; wide keeps the /profile/edit route.
+              onPressed: () {
+                if (isNarrowSheet(context)) {
+                  showProfileSheet<void>(
+                    context,
+                    title: 'Edit Profile',
+                    subtitle:
+                        'Update your name or switch to a new verified email.',
+                    child: const EditProfileForm(),
+                  );
+                } else {
+                  context.push('/profile/edit');
+                }
+              },
             ),
           ),
         ],
@@ -310,8 +324,21 @@ class _SettingsColumn extends StatelessWidget {
               _ProfileSettingTile(
                 icon: Icons.person_outline_rounded,
                 title: 'Edit Profile',
-                // C38: plain navigation to /profile/edit.
-                onTap: () => context.push('/profile/edit'),
+                // C148: mobile (<768px) opens the shared bottom sheet with
+                // the same form; wide keeps the /profile/edit route.
+                onTap: () {
+                  if (isNarrowSheet(context)) {
+                    showProfileSheet<void>(
+                      context,
+                      title: 'Edit Profile',
+                      subtitle:
+                          'Update your name or switch to a new verified email.',
+                      child: const EditProfileForm(),
+                    );
+                  } else {
+                    context.push('/profile/edit');
+                  }
+                },
               ),
 
               const _SettingDivider(),

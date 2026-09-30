@@ -118,7 +118,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('profile Edit tile pushes /profile/edit', (tester) async {
+  testWidgets('profile Edit tile opens bottom sheet on narrow', (tester) async {
     tester.view.physicalSize = const Size(360, 800);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -151,7 +151,11 @@ void main() {
     await tester.tap(find.text('Edit Profile'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(EditProfileScreen), findsOneWidget);
+    // C148: narrow (<768px) presents the shared sheet with the same form —
+    // the route is not pushed.
+    expect(find.byType(EditProfileScreen), findsNothing);
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(find.byKey(const Key('edit_profile_name')), findsOneWidget);
     expect(find.byKey(const Key('edit_profile_submit')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

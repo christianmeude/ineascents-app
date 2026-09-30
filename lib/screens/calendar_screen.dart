@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../config/theme.dart';
 import '../providers/index.dart';
@@ -81,17 +82,55 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             // shimmer/content swaps.
             return SkeletonCrossfade(
               isLoading: isInitialLoading,
-              skeleton: ListView(
-                padding: ResponsiveAppShell.screenHeaderPadding,
-                children: const [
-                  TabHeader(
-                    title: 'Availability',
-                    count: 'Choose a date for your scent experience.',
+              skeleton: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: ResponsiveAppShell.maxContentWidth,
                   ),
-                  // C60: Q9 retired.
-                  SizedBox(height: 22),
-                  SkeletonCalendar(),
-                ],
+                  child: ListView(
+                    padding: ResponsiveAppShell.screenHeaderPadding,
+                    children: [
+                      // C125: skeleton-exclusive placeholder bars (no TabHeader
+                      // texts while loading); metrics nod to TabHeader title
+                      // (28/32) + count (13) without pretending pixel parity.
+                      Shimmer.fromColors(
+                        baseColor:
+                            Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF36222C)
+                            : const Color(0xFF99868C),
+                        highlightColor:
+                            Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF5A4450)
+                            : const Color(0xFFE8DEE2),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 22,
+                              width: 200,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Container(
+                              height: 13,
+                              width: 160,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // C60: Q9 retired.
+                      const SizedBox(height: 22),
+                      const SkeletonCalendar(),
+                    ],
+                  ),
+                ),
               ),
               child: content,
             );
@@ -256,10 +295,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             _formatDate(_selectedDay!),
             // C117: theme ramp (explicit Figtree).
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: titleColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
+              color: titleColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -268,10 +307,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 : 'Unavailable — pick another date',
             // C117: theme ramp (explicit Figtree).
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: bodyColor,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
-                ),
+              color: bodyColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+            ),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -305,10 +344,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             'Select a date to see details.',
             // C117: theme ramp (explicit Figtree).
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: bodyColor,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
-                ),
+              color: bodyColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ],
       ],

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/index.dart';
 import '../config/theme.dart';
 import '../widgets/index.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key, this.verified = false});
@@ -149,7 +150,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       0xFFFDF4F5,
                                     ).withValues(alpha: 0.8)
                                   : const Color(0xFF6A4053),
-                              onTap: () => context.push('/forgot-password'),
+                              // C150: mobile (<768px) opens the shared bottom
+                              // sheet with the same form; wide keeps the
+                              // /forgot-password route.
+                              onTap: () {
+                                if (isNarrowSheet(context)) {
+                                  // C150: no subtitle — the shared form
+                                  // carries its own description header, so
+                                  // passing one would repeat it in-sheet.
+                                  showProfileSheet<void>(
+                                    context,
+                                    title: 'Forgot Password',
+                                    child: const ForgotPasswordForm(),
+                                  );
+                                } else {
+                                  context.push('/forgot-password');
+                                }
+                              },
                             ),
                           ],
                         ),

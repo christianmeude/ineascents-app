@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'tab_header.dart';
@@ -122,31 +121,17 @@ class SkeletonPackagesLoading extends StatelessWidget {
         key: const Key('skeleton_packages_loading'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // C97: Collections header tease — script title per TabHeader
-          // (Great Vibes) + count slot bar; mirrors the real header
-          // above the hero instead of jumping straight to content.
-          LayoutBuilder(
-            builder: (context, constraints) {
-              return Column(
-                key: const Key('skeleton_collections_header'),
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Our Collections',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.greatVibes(
-                      fontSize: TabHeader.titleSizeFor(constraints.maxWidth),
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white,
-                    ).copyWith(
-                        fontFamilyFallback: TabHeader.titleFallback),
-                  ),
-                  const SizedBox(height: 5),
-                  bar(height: 13, width: 200, radius: 6),
-                ],
-              );
-            },
+          // C121: real TabHeader — pixel-identical by construction, so the
+          // header can never drift from the loaded screen again.
+          const Column(
+            key: Key('skeleton_collections_header'),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TabHeader(
+                title: 'Our Collections',
+                count: 'Discover your perfect scent.',
+              ),
+            ],
           ),
           const SizedBox(height: 20),
           // Hero mirror: 200px banner (mobile) with thumb + text block.
@@ -188,11 +173,20 @@ class SkeletonPackagesLoading extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            bar(height: 18, width: double.infinity, radius: 6),
+                            bar(
+                                height: wide ? 22.0 : 18.0,
+                                width: double.infinity,
+                                radius: 6),
                             const SizedBox(height: 8),
-                            bar(height: 14, width: 140, radius: 6),
+                            bar(
+                                height: wide ? 16.0 : 14.0,
+                                width: 140,
+                                radius: 6),
                             const SizedBox(height: 8),
-                            bar(height: 12, width: double.infinity, radius: 6),
+                            bar(
+                                height: wide ? 13.0 : 12.0,
+                                width: double.infinity,
+                                radius: 6),
                           ],
                         ),
                       ),
@@ -205,41 +199,77 @@ class SkeletonPackagesLoading extends StatelessWidget {
           const SizedBox(height: 20),
           bar(height: 18, width: 200, radius: 6),
           const SizedBox(height: 12),
-          for (int i = 0; i < 3; i++) ...[
-            Container(
-              key: Key('skeleton_pax_row_$i'),
-              width: double.infinity,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1C1618) : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
+          // C121: 4 rows + desktop 2-col grid mirror the real list — the
+          // offering carries 4 Pax tiers and wide screens grid them.
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= 768;
+              Widget row(int i) {
+                return Container(
+                  key: Key('skeleton_pax_row_$i'),
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 16, vertical: wide ? 16.0 : 12.0),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1C1618) : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            bar(
+                                height: wide ? 16.0 : 15.0,
+                                width: 140,
+                                radius: 6),
+                            const SizedBox(height: 6),
+                            bar(
+                                height: wide ? 14.0 : 13.0,
+                                width: 90,
+                                radius: 6),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              if (wide) {
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        mainAxisExtent: 78,
+                      ),
+                  itemCount: 4,
+                  itemBuilder: (context, i) => row(i),
+                );
+              }
+              return Column(
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        bar(height: 15, width: 140, radius: 6),
-                        const SizedBox(height: 6),
-                        bar(height: 13, width: 90, radius: 6),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                  for (int i = 0; i < 4; i++) ...[
+                    row(i),
+                    if (i < 3) const SizedBox(height: 10),
+                  ],
                 ],
-              ),
-            ),
-            if (i < 2) const SizedBox(height: 10),
-          ],
+              );
+            },
+          ),
         ],
       ),
     );

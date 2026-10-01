@@ -171,7 +171,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           key: const Key('register_password'),
                           controller: passwordController,
                           obscureText: obscurePassword,
-                          autofillHints: const [AutofillHints.password],
+                          // C165: new-account hint (was `password`, which
+                          // invites the password manager to treat this as a
+                          // login field and fight typing with autofill UI).
+                          autofillHints: const [AutofillHints.newPassword],
                           suffixIcon: IconButton(
                             mouseCursor: SystemMouseCursors.click,
                             // C108: screen-reader label for the toggle.

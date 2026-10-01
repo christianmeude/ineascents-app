@@ -69,18 +69,12 @@ void main() {
       final summary = find.byKey(const Key('mobile_details_summary_card'));
       final card = find.byKey(const Key('mobile_details_package_card'));
       expect(summary, findsOneWidget);
-      expect(card, findsOneWidget);
+      // C151: offering recap card removed from Details stage.
+      expect(card, findsNothing);
 
-      // Stacked vertically: package card starts at/below summary end.
-      final summaryBottom = tester.getBottomLeft(summary).dy;
-      final cardTop = tester.getTopLeft(card).dy;
-      expect(cardTop, greaterThanOrEqualTo(summaryBottom - 1.0));
-
-      // Full width: both span the same horizontal extent (no side-by-side).
-      final summaryRect = tester.getRect(summary);
-      final cardRect = tester.getRect(card);
-      expect(cardRect.left, moreOrLessEquals(summaryRect.left, epsilon: 2.0));
-      expect(cardRect.right, moreOrLessEquals(summaryRect.right, epsilon: 2.0));
+      // Totals intact in summary card + contact section follows.
+      expect(find.text('Total Cost:'), findsOneWidget);
+      expect(find.text('Your Contact Details'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

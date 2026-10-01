@@ -338,6 +338,54 @@ class AppTheme {
   static const Color nightSurface = Color(0xFF1C1618);
   static const Color nightBorder = Color(0xFF36222C);
 
+  // C152: dark schedule-picker tokens — dial, hour/minute, dayPeriod,
+  // entry icon, and help text all resolve to night fills + cream text,
+  // so the time picker never shows a light field in dark mode.
+  static const TimePickerThemeData darkTimePickerTheme = TimePickerThemeData(
+    backgroundColor: nightSurface,
+    dialBackgroundColor: night,
+    dialHandColor: Color(0xFFFDF4F5),
+    dialTextColor: Color(0xFFFDF4F5),
+    hourMinuteColor: night,
+    hourMinuteTextColor: Color(0xFFFDF4F5),
+    dayPeriodColor: night,
+    dayPeriodTextColor: Color(0xFFFDF4F5),
+    entryModeIconColor: Color(0xFFFDF4F5),
+    helpTextStyle: TextStyle(color: Color(0xFFC4ACAC)),
+    hourMinuteShape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+      side: BorderSide(color: nightBorder),
+    ),
+    dayPeriodShape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+      side: BorderSide(color: nightBorder),
+    ),
+    dayPeriodBorderSide: BorderSide(color: nightBorder),
+  );
+
+  // C152: forces the dark picker tokens in dark mode; light untouched.
+  static Widget darkTimePickerBuilder(BuildContext context, Widget? child) {
+    final theme = Theme.of(context);
+    if (theme.brightness != Brightness.dark) {
+      return child ?? const SizedBox.shrink();
+    }
+    return Theme(
+      data: theme.copyWith(
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFFFDF4F5),
+          secondary: secondary,
+          surface: nightSurface,
+          onPrimary: night,
+          onSecondary: Colors.white,
+          onSurface: Color(0xFFFDF4F5),
+          error: unavailable,
+        ),
+        timePickerTheme: darkTimePickerTheme,
+      ),
+      child: child ?? const SizedBox.shrink(),
+    );
+  }
+
   static ThemeData get darkTheme {
     const darkBg = night;
     const darkSurface = nightSurface;
@@ -586,6 +634,8 @@ class AppTheme {
           borderSide: const BorderSide(color: darkPrimary, width: 2),
         ),
       ),
+      // C152: schedule picker renders night tokens in dark mode.
+      timePickerTheme: darkTimePickerTheme,
       useMaterial3: true,
     );
   }

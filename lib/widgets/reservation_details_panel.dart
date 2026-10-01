@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/theme.dart';
 import '../models/index.dart';
 import '../utils/peso.dart';
 import 'card_surfaces.dart';
@@ -197,6 +198,8 @@ class ReservationDetailsPanel extends StatelessWidget {
                   final picked = await showTimePicker(
                     context: context,
                     initialTime: initial,
+                    // C152: force dark picker tokens in dark mode.
+                    builder: AppTheme.darkTimePickerBuilder,
                   );
                   if (picked == null) return;
                   onTimeSelected(

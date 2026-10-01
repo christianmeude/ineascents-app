@@ -518,7 +518,12 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         minute: int.parse(parts[1]),
       );
     }
-    final picked = await showTimePicker(context: context, initialTime: initial);
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      // C152: force dark picker tokens in dark mode.
+      builder: AppTheme.darkTimePickerBuilder,
+    );
     if (picked == null || !mounted) return;
     final value =
         '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
@@ -1132,7 +1137,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                           vertical: 14,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFDF4F5),
+                          // C152: dark-aware fill (was hardcoded light cream).
+                          color: CardSurfaces.chipBg(context),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: _surfaceBorder),
                         ),
@@ -1941,7 +1947,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFDF4F5),
+                  // C152: dark-aware fill (was hardcoded light cream).
+                  color: CardSurfaces.chipBg(context),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: _surfaceBorder),
                 ),

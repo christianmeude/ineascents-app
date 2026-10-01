@@ -2224,7 +2224,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        '${_selectedPax ?? 50} PAX · tier price',
+                        '${_selectedPax ?? 50} PAX',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -2253,17 +2253,17 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 ),
                 const SizedBox(height: 15),
                 // C154: two labeled subgroups mirroring the Details card
-                // (Inclusions:/Freebies:) — rows keep Included/Free amounts.
+                // (Inclusions:/Freebies:) — C155: rows distilled to labels only.
                 Text(
                   'Inclusions:',
                   style: TextStyle(fontSize: 12, color: _body),
                 ),
                 const SizedBox(height: 10),
                 // Live package data — same source as the desktop summary.
-                // No per-item prices exist; rows show Included/Free.
-                ...?package.inclusions?.map(
-                  (label) => {'label': label, 'val': 'Included'},
-                ).map((item) {
+                // C154: two labeled subgroups mirroring the Details card
+                // (Inclusions:/Freebies:) — C155: rows distilled to
+                // labels only, no per-row Included/Free trailing texts.
+                ...?package.inclusions?.map((label) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
@@ -2271,7 +2271,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            '• ${item['label']}',
+                            '• $label',
                             style: TextStyle(
                               fontSize: 12,
                               color: _title,
@@ -2279,21 +2279,6 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                             ),
                             softWrap: true,
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          item['val']!,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: _body,
-                            height: 1.35,
-                            fontFeatures: const [
-                              FontFeature.tabularFigures(),
-                            ],
-                          ),
-                          softWrap: true,
-                          textAlign: TextAlign.end,
                         ),
                       ],
                     ),
@@ -2305,9 +2290,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                   style: TextStyle(fontSize: 12, color: _body),
                 ),
                 const SizedBox(height: 10),
-                ...?package.freebies?.map(
-                  (label) => {'label': label, 'val': 'Free'},
-                ).map((item) {
+                ...?package.freebies?.map((label) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
@@ -2315,7 +2298,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            '• ${item['label']}',
+                            '• $label',
                             style: TextStyle(
                               fontSize: 12,
                               color: _title,
@@ -2323,21 +2306,6 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                             ),
                             softWrap: true,
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          item['val']!,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: _body,
-                            height: 1.35,
-                            fontFeatures: const [
-                              FontFeature.tabularFigures(),
-                            ],
-                          ),
-                          softWrap: true,
-                          textAlign: TextAlign.end,
                         ),
                       ],
                     ),

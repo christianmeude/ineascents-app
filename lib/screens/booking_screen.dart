@@ -2308,7 +2308,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 ),
                 Row(
                   key: const Key('price_details_total_row'),
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
                       child: Text(
@@ -2325,19 +2326,23 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                     const SizedBox(width: 12),
                     Flexible(
                       key: const Key('price_details_total_amount'),
-                      child: Text(
-                        formatPeso(package.priceForPax(_selectedPax)),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: _title,
-                          height: 1.35,
-                          fontFeatures: const [
-                            FontFeature.tabularFigures(),
-                          ],
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          formatPeso(package.priceForPax(_selectedPax)),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: _title,
+                            height: 1.35,
+                            fontFeatures: const [
+                              FontFeature.tabularFigures(),
+                            ],
+                          ),
+                          softWrap: true,
+                          textAlign: TextAlign.end,
+                          overflow: TextOverflow.visible,
                         ),
-                        softWrap: true,
-                        textAlign: TextAlign.end,
                       ),
                     ),
                   ],

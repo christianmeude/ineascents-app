@@ -186,6 +186,9 @@ void main() {
         find.byKey(const Key('register_password')),
         'secret-pass-1',
       );
+      // C159: submit stays disabled until privacy is accepted.
+      await tester.tap(find.byKey(const Key('register_consent')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('register_submit')));
       await tester.pumpAndSettle();
 

@@ -23,6 +23,10 @@ _Booking _$BookingFromJson(Map<String, dynamic> json) => _Booking(
   status: json['status'] as String?,
   checkoutUrl: json['checkout_url'] as String?,
   inquiryId: (json['inquiry_id'] as num?)?.toInt(),
+  consentPrivacyVersion: json['consent_privacy_version'] as String?,
+  consentedAt: json['consented_at'] == null
+      ? null
+      : DateTime.parse(json['consented_at'] as String),
   package: json['package'] == null
       ? null
       : Package.fromJson(json['package'] as Map<String, dynamic>),
@@ -46,6 +50,8 @@ Map<String, dynamic> _$BookingToJson(_Booking instance) => <String, dynamic>{
   'status': instance.status,
   'checkout_url': instance.checkoutUrl,
   'inquiry_id': instance.inquiryId,
+  'consent_privacy_version': instance.consentPrivacyVersion,
+  'consented_at': instance.consentedAt?.toIso8601String(),
   'package': instance.package,
   'scents': instance.scents,
 };

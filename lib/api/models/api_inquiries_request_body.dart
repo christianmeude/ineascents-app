@@ -13,6 +13,8 @@ abstract class ApiInquiriesRequestBody with _$ApiInquiriesRequestBody {
     required String name,
     required String email,
     required String phone,
+    @JsonKey(name: 'consent_privacy_version')
+    required String consentPrivacyVersion,
     @JsonKey(name: 'event_date')
     DateTime? eventDate,
     String? message,

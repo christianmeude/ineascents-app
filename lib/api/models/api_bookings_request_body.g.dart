@@ -16,6 +16,7 @@ _ApiBookingsRequestBody _$ApiBookingsRequestBodyFromJson(
   eventDate: DateTime.parse(json['event_date'] as String),
   venueAddress: json['venue_address'] as String,
   paymentMethod: PaymentMethod.fromJson(json['payment_method'] as String),
+  consentPrivacyVersion: json['consent_privacy_version'] as String,
   customerPhone: json['customer_phone'] as String?,
   eventTime: json['event_time'] as String?,
   scentIds: (json['scent_ids'] as List<dynamic>?)
@@ -33,6 +34,7 @@ Map<String, dynamic> _$ApiBookingsRequestBodyToJson(
   'event_date': instance.eventDate.toIso8601String(),
   'venue_address': instance.venueAddress,
   'payment_method': _$PaymentMethodEnumMap[instance.paymentMethod]!,
+  'consent_privacy_version': instance.consentPrivacyVersion,
   'customer_phone': instance.customerPhone,
   'event_time': instance.eventTime,
   'scent_ids': instance.scentIds,

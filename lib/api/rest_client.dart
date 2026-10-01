@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 
 import 'auth/auth_api_client.dart';
 import 'profile/profile_api_client.dart';
+import 'data_rights/data_rights_api_client.dart';
 import 'availability/availability_api_client.dart';
 import 'bookings/bookings_api_client.dart';
 import 'inquiries/inquiries_api_client.dart';
@@ -28,6 +29,7 @@ class RestClient {
 
   AuthApiClient? _auth;
   ProfileApiClient? _profile;
+  DataRightsApiClient? _dataRights;
   AvailabilityApiClient? _availability;
   BookingsApiClient? _bookings;
   InquiriesApiClient? _inquiries;
@@ -36,6 +38,8 @@ class RestClient {
   AuthApiClient get auth => _auth ??= AuthApiClient(_dio, baseUrl: _baseUrl);
 
   ProfileApiClient get profile => _profile ??= ProfileApiClient(_dio, baseUrl: _baseUrl);
+
+  DataRightsApiClient get dataRights => _dataRights ??= DataRightsApiClient(_dio, baseUrl: _baseUrl);
 
   AvailabilityApiClient get availability => _availability ??= AvailabilityApiClient(_dio, baseUrl: _baseUrl);
 

@@ -46,6 +46,14 @@ class AppRouter {
         builder: (context, state) =>
             _titled('Register – Inea Scents', const RegisterScreen()),
       ),
+      // C159: offline-bundled policy (mirrors backend v2026-10-01).
+      GoRoute(
+        path: '/privacy',
+        builder: (context, state) => _titled(
+          'Privacy Policy – Inea Scents',
+          const PrivacyPolicyScreen(),
+        ),
+      ),
       GoRoute(
         path: '/forgot-password',
         builder: (context, state) => _titled(

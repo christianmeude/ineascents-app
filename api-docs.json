@@ -18,6 +18,7 @@
                     "Auth"
                 ],
                 "summary": "Register a new user",
+                "description": "Creates a pending user and sends an email verification code. No session is issued until the email is verified.",
                 "operationId": "8e4e3cb7b46126f4696379d3c7eeb4ad",
                 "requestBody": {
                     "required": true,
@@ -51,18 +52,142 @@
                     }
                 },
                 "responses": {
-                    "200": {
-                        "description": "User registered successfully",
+                    "201": {
+                        "description": "User created pending verification; code sent",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AuthResponse"
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Verify your email to finish registration."
+                                        },
+                                        "code_expires_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
                     "422": {
                         "description": "Validation Error"
+                    }
+                }
+            }
+        },
+        "/api/register/verify": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify registration email with code",
+                "description": "Marks the pending user verified. No session is issued; log in afterwards.",
+                "operationId": "4908c6cc312431f247ca262447fafde1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "482916"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email verified; user may now log in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No pending registration"
+                    },
+                    "422": {
+                        "description": "Wrong, expired, or locked code"
+                    }
+                }
+            }
+        },
+        "/api/register/resend": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Re-send registration verification code",
+                "description": "Issues a fresh code for a pending registration.",
+                "operationId": "4fd2c71fd3e444aac82d2b3a0ac85e1f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Fresh code sent to the registration address",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Code re-sent."
+                                        },
+                                        "code_expires_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No pending registration"
+                    },
+                    "429": {
+                        "description": "Resend cooldown"
                     }
                 }
             }
@@ -211,6 +336,48 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "delete": {
+                "tags": [
+                    "Data Rights"
+                ],
+                "summary": "Erase the requester (anonymize, revoke all sessions)",
+                "operationId": "60333eba8d715b99db3e425ed0264b85",
+                "responses": {
+                    "200": {
+                        "description": "Erased"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Revoke the current session token",
+                "operationId": "ad65cbbd4e9f201619eae184a5961a98",
+                "responses": {
+                    "200": {
+                        "description": "Logged out"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/availability": {
@@ -324,7 +491,8 @@
                                     "pax",
                                     "event_date",
                                     "venue_address",
-                                    "payment_method"
+                                    "payment_method",
+                                    "consent_privacy_version"
                                 ],
                                 "properties": {
                                     "package_id": {
@@ -365,6 +533,10 @@
                                         "items": {
                                             "type": "integer"
                                         }
+                                    },
+                                    "consent_privacy_version": {
+                                        "type": "string",
+                                        "example": "2026-10-01"
                                     }
                                 },
                                 "type": "object"
@@ -396,6 +568,28 @@
                 ]
             }
         },
+        "/api/user/export": {
+            "get": {
+                "tags": [
+                    "Data Rights"
+                ],
+                "summary": "Export all data held about the requester",
+                "operationId": "5b3d6de5b5ed0d4f3e9682796cb67a98",
+                "responses": {
+                    "200": {
+                        "description": "Profile, bookings, and email-matched inquiries"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/inquiries": {
             "post": {
                 "tags": [
@@ -412,7 +606,8 @@
                                 "required": [
                                     "name",
                                     "email",
-                                    "phone"
+                                    "phone",
+                                    "consent_privacy_version"
                                 ],
                                 "properties": {
                                     "name": {
@@ -432,6 +627,10 @@
                                     "message": {
                                         "type": "string",
                                         "nullable": true
+                                    },
+                                    "consent_privacy_version": {
+                                        "type": "string",
+                                        "example": "2026-10-01"
                                     }
                                 },
                                 "type": "object"
@@ -966,6 +1165,15 @@
                         "type": "integer",
                         "nullable": true
                     },
+                    "consent_privacy_version": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "consented_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
                     "package": {
                         "$ref": "#/components/schemas/Package"
                     },
@@ -1007,6 +1215,15 @@
                     },
                     "archived": {
                         "type": "boolean"
+                    },
+                    "consent_privacy_version": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "consented_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -1154,6 +1371,10 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Data Rights",
+            "description": "Data Rights"
         },
         {
             "name": "Inquiries",

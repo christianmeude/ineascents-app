@@ -38,6 +38,10 @@ abstract class Booking with _$Booking {
     String? checkoutUrl,
     @JsonKey(name: 'inquiry_id')
     int? inquiryId,
+    @JsonKey(name: 'consent_privacy_version')
+    String? consentPrivacyVersion,
+    @JsonKey(name: 'consented_at')
+    DateTime? consentedAt,
     Package? package,
     List<Scent>? scents,
   }) = _Booking;

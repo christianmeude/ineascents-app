@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inea_scents_client/api/export.dart';
+import 'package:inea_scents_client/config/privacy.dart';
 import 'package:inea_scents_client/models/payment.dart';
 
 void main() {
@@ -47,6 +48,7 @@ void main() {
         eventDate: DateTime.utc(2026, 10, 1),
         venueAddress: 'Makati',
         paymentMethod: PaymentMethod.fromJson('online'),
+        consentPrivacyVersion: privacyPolicyVersion,
       );
       final json = body.toJson();
       expect(json['payment_method'], 'online');

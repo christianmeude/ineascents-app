@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,6 +20,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final passwordController = TextEditingController();
 
   bool obscurePassword = true;
+  // C159: privacy acknowledgment gates submit (version-pinned consent is
+  // captured server-side at inquiry/booking; register carries no PII beyond
+  // the account itself).
+  bool consentChecked = false;
 
   @override
   void dispose() {
@@ -178,13 +183,72 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ),
                         ),
 
+                        const SizedBox(height: 16),
+
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: Checkbox(
+                                key: const Key('register_consent'),
+                                value: consentChecked,
+                                onChanged: (v) => setState(
+                                  () => consentChecked = v ?? false,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(
+                                  () => consentChecked = !consentChecked,
+                                ),
+                                child: Text.rich(
+                                  TextSpan(
+                                    text: 'I agree to the ',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: inputLabelColor,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: 'privacy policy',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: inputLabelColor,
+                                          decoration:
+                                              TextDecoration.underline,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () =>
+                                              context.push('/privacy'),
+                                      ),
+                                      TextSpan(
+                                        text:
+                                            ' and to being contacted about my account.',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: inputLabelColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
                         const SizedBox(height: 32),
                         SizedBox(
                           width: double.infinity,
                           height: 44,
                           child: ElevatedButton(
                             key: const Key('register_submit'),
-                            onPressed: authState.isLoading
+                            // C159: submit stays disabled until privacy is accepted.
+                            onPressed: authState.isLoading || !consentChecked
                                 ? null
                                 : () {
                                     ref

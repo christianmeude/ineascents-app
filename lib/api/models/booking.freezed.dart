@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Booking {
 
- int? get id;@JsonKey(name: 'booking_reference') String? get bookingReference;@JsonKey(name: 'user_id') int? get userId;@JsonKey(name: 'customer_name') String? get customerName;@JsonKey(name: 'customer_email') String? get customerEmail;@JsonKey(name: 'customer_phone') String? get customerPhone; int? get pax;@JsonKey(name: 'event_date') DateTime? get eventDate;@JsonKey(name: 'event_time') String? get eventTime;@JsonKey(name: 'venue_address') String? get venueAddress;@JsonKey(name: 'payment_method') String? get paymentMethod; String? get status;@JsonKey(name: 'checkout_url') String? get checkoutUrl;@JsonKey(name: 'inquiry_id') int? get inquiryId; Package? get package; List<Scent>? get scents;
+ int? get id;@JsonKey(name: 'booking_reference') String? get bookingReference;@JsonKey(name: 'user_id') int? get userId;@JsonKey(name: 'customer_name') String? get customerName;@JsonKey(name: 'customer_email') String? get customerEmail;@JsonKey(name: 'customer_phone') String? get customerPhone; int? get pax;@JsonKey(name: 'event_date') DateTime? get eventDate;@JsonKey(name: 'event_time') String? get eventTime;@JsonKey(name: 'venue_address') String? get venueAddress;@JsonKey(name: 'payment_method') String? get paymentMethod; String? get status;@JsonKey(name: 'checkout_url') String? get checkoutUrl;@JsonKey(name: 'inquiry_id') int? get inquiryId;@JsonKey(name: 'consent_privacy_version') String? get consentPrivacyVersion;@JsonKey(name: 'consented_at') DateTime? get consentedAt; Package? get package; List<Scent>? get scents;
 /// Create a copy of Booking
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $BookingCopyWith<Booking> get copyWith => _$BookingCopyWithImpl<Booking>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Booking&&(identical(other.id, id) || other.id == id)&&(identical(other.bookingReference, bookingReference) || other.bookingReference == bookingReference)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.customerName, customerName) || other.customerName == customerName)&&(identical(other.customerEmail, customerEmail) || other.customerEmail == customerEmail)&&(identical(other.customerPhone, customerPhone) || other.customerPhone == customerPhone)&&(identical(other.pax, pax) || other.pax == pax)&&(identical(other.eventDate, eventDate) || other.eventDate == eventDate)&&(identical(other.eventTime, eventTime) || other.eventTime == eventTime)&&(identical(other.venueAddress, venueAddress) || other.venueAddress == venueAddress)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.status, status) || other.status == status)&&(identical(other.checkoutUrl, checkoutUrl) || other.checkoutUrl == checkoutUrl)&&(identical(other.inquiryId, inquiryId) || other.inquiryId == inquiryId)&&(identical(other.package, package) || other.package == package)&&const DeepCollectionEquality().equals(other.scents, scents));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Booking&&(identical(other.id, id) || other.id == id)&&(identical(other.bookingReference, bookingReference) || other.bookingReference == bookingReference)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.customerName, customerName) || other.customerName == customerName)&&(identical(other.customerEmail, customerEmail) || other.customerEmail == customerEmail)&&(identical(other.customerPhone, customerPhone) || other.customerPhone == customerPhone)&&(identical(other.pax, pax) || other.pax == pax)&&(identical(other.eventDate, eventDate) || other.eventDate == eventDate)&&(identical(other.eventTime, eventTime) || other.eventTime == eventTime)&&(identical(other.venueAddress, venueAddress) || other.venueAddress == venueAddress)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.status, status) || other.status == status)&&(identical(other.checkoutUrl, checkoutUrl) || other.checkoutUrl == checkoutUrl)&&(identical(other.inquiryId, inquiryId) || other.inquiryId == inquiryId)&&(identical(other.consentPrivacyVersion, consentPrivacyVersion) || other.consentPrivacyVersion == consentPrivacyVersion)&&(identical(other.consentedAt, consentedAt) || other.consentedAt == consentedAt)&&(identical(other.package, package) || other.package == package)&&const DeepCollectionEquality().equals(other.scents, scents));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,bookingReference,userId,customerName,customerEmail,customerPhone,pax,eventDate,eventTime,venueAddress,paymentMethod,status,checkoutUrl,inquiryId,package,const DeepCollectionEquality().hash(scents));
+int get hashCode => Object.hash(runtimeType,id,bookingReference,userId,customerName,customerEmail,customerPhone,pax,eventDate,eventTime,venueAddress,paymentMethod,status,checkoutUrl,inquiryId,consentPrivacyVersion,consentedAt,package,const DeepCollectionEquality().hash(scents));
 
 @override
 String toString() {
-  return 'Booking(id: $id, bookingReference: $bookingReference, userId: $userId, customerName: $customerName, customerEmail: $customerEmail, customerPhone: $customerPhone, pax: $pax, eventDate: $eventDate, eventTime: $eventTime, venueAddress: $venueAddress, paymentMethod: $paymentMethod, status: $status, checkoutUrl: $checkoutUrl, inquiryId: $inquiryId, package: $package, scents: $scents)';
+  return 'Booking(id: $id, bookingReference: $bookingReference, userId: $userId, customerName: $customerName, customerEmail: $customerEmail, customerPhone: $customerPhone, pax: $pax, eventDate: $eventDate, eventTime: $eventTime, venueAddress: $venueAddress, paymentMethod: $paymentMethod, status: $status, checkoutUrl: $checkoutUrl, inquiryId: $inquiryId, consentPrivacyVersion: $consentPrivacyVersion, consentedAt: $consentedAt, package: $package, scents: $scents)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $BookingCopyWith<$Res>  {
   factory $BookingCopyWith(Booking value, $Res Function(Booking) _then) = _$BookingCopyWithImpl;
 @useResult
 $Res call({
- int? id,@JsonKey(name: 'booking_reference') String? bookingReference,@JsonKey(name: 'user_id') int? userId,@JsonKey(name: 'customer_name') String? customerName,@JsonKey(name: 'customer_email') String? customerEmail,@JsonKey(name: 'customer_phone') String? customerPhone, int? pax,@JsonKey(name: 'event_date') DateTime? eventDate,@JsonKey(name: 'event_time') String? eventTime,@JsonKey(name: 'venue_address') String? venueAddress,@JsonKey(name: 'payment_method') String? paymentMethod, String? status,@JsonKey(name: 'checkout_url') String? checkoutUrl,@JsonKey(name: 'inquiry_id') int? inquiryId, Package? package, List<Scent>? scents
+ int? id,@JsonKey(name: 'booking_reference') String? bookingReference,@JsonKey(name: 'user_id') int? userId,@JsonKey(name: 'customer_name') String? customerName,@JsonKey(name: 'customer_email') String? customerEmail,@JsonKey(name: 'customer_phone') String? customerPhone, int? pax,@JsonKey(name: 'event_date') DateTime? eventDate,@JsonKey(name: 'event_time') String? eventTime,@JsonKey(name: 'venue_address') String? venueAddress,@JsonKey(name: 'payment_method') String? paymentMethod, String? status,@JsonKey(name: 'checkout_url') String? checkoutUrl,@JsonKey(name: 'inquiry_id') int? inquiryId,@JsonKey(name: 'consent_privacy_version') String? consentPrivacyVersion,@JsonKey(name: 'consented_at') DateTime? consentedAt, Package? package, List<Scent>? scents
 });
 
 
@@ -65,7 +65,7 @@ class _$BookingCopyWithImpl<$Res>
 
 /// Create a copy of Booking
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? bookingReference = freezed,Object? userId = freezed,Object? customerName = freezed,Object? customerEmail = freezed,Object? customerPhone = freezed,Object? pax = freezed,Object? eventDate = freezed,Object? eventTime = freezed,Object? venueAddress = freezed,Object? paymentMethod = freezed,Object? status = freezed,Object? checkoutUrl = freezed,Object? inquiryId = freezed,Object? package = freezed,Object? scents = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? bookingReference = freezed,Object? userId = freezed,Object? customerName = freezed,Object? customerEmail = freezed,Object? customerPhone = freezed,Object? pax = freezed,Object? eventDate = freezed,Object? eventTime = freezed,Object? venueAddress = freezed,Object? paymentMethod = freezed,Object? status = freezed,Object? checkoutUrl = freezed,Object? inquiryId = freezed,Object? consentPrivacyVersion = freezed,Object? consentedAt = freezed,Object? package = freezed,Object? scents = freezed,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,bookingReference: freezed == bookingReference ? _self.bookingReference : bookingReference // ignore: cast_nullable_to_non_nullable
@@ -81,7 +81,9 @@ as String?,paymentMethod: freezed == paymentMethod ? _self.paymentMethod : payme
 as String?,status: freezed == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String?,checkoutUrl: freezed == checkoutUrl ? _self.checkoutUrl : checkoutUrl // ignore: cast_nullable_to_non_nullable
 as String?,inquiryId: freezed == inquiryId ? _self.inquiryId : inquiryId // ignore: cast_nullable_to_non_nullable
-as int?,package: freezed == package ? _self.package : package // ignore: cast_nullable_to_non_nullable
+as int?,consentPrivacyVersion: freezed == consentPrivacyVersion ? _self.consentPrivacyVersion : consentPrivacyVersion // ignore: cast_nullable_to_non_nullable
+as String?,consentedAt: freezed == consentedAt ? _self.consentedAt : consentedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,package: freezed == package ? _self.package : package // ignore: cast_nullable_to_non_nullable
 as Package?,scents: freezed == scents ? _self.scents : scents // ignore: cast_nullable_to_non_nullable
 as List<Scent>?,
   ));
@@ -180,10 +182,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id, @JsonKey(name: 'booking_reference')  String? bookingReference, @JsonKey(name: 'user_id')  int? userId, @JsonKey(name: 'customer_name')  String? customerName, @JsonKey(name: 'customer_email')  String? customerEmail, @JsonKey(name: 'customer_phone')  String? customerPhone,  int? pax, @JsonKey(name: 'event_date')  DateTime? eventDate, @JsonKey(name: 'event_time')  String? eventTime, @JsonKey(name: 'venue_address')  String? venueAddress, @JsonKey(name: 'payment_method')  String? paymentMethod,  String? status, @JsonKey(name: 'checkout_url')  String? checkoutUrl, @JsonKey(name: 'inquiry_id')  int? inquiryId,  Package? package,  List<Scent>? scents)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id, @JsonKey(name: 'booking_reference')  String? bookingReference, @JsonKey(name: 'user_id')  int? userId, @JsonKey(name: 'customer_name')  String? customerName, @JsonKey(name: 'customer_email')  String? customerEmail, @JsonKey(name: 'customer_phone')  String? customerPhone,  int? pax, @JsonKey(name: 'event_date')  DateTime? eventDate, @JsonKey(name: 'event_time')  String? eventTime, @JsonKey(name: 'venue_address')  String? venueAddress, @JsonKey(name: 'payment_method')  String? paymentMethod,  String? status, @JsonKey(name: 'checkout_url')  String? checkoutUrl, @JsonKey(name: 'inquiry_id')  int? inquiryId, @JsonKey(name: 'consent_privacy_version')  String? consentPrivacyVersion, @JsonKey(name: 'consented_at')  DateTime? consentedAt,  Package? package,  List<Scent>? scents)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Booking() when $default != null:
-return $default(_that.id,_that.bookingReference,_that.userId,_that.customerName,_that.customerEmail,_that.customerPhone,_that.pax,_that.eventDate,_that.eventTime,_that.venueAddress,_that.paymentMethod,_that.status,_that.checkoutUrl,_that.inquiryId,_that.package,_that.scents);case _:
+return $default(_that.id,_that.bookingReference,_that.userId,_that.customerName,_that.customerEmail,_that.customerPhone,_that.pax,_that.eventDate,_that.eventTime,_that.venueAddress,_that.paymentMethod,_that.status,_that.checkoutUrl,_that.inquiryId,_that.consentPrivacyVersion,_that.consentedAt,_that.package,_that.scents);case _:
   return orElse();
 
 }
@@ -201,10 +203,10 @@ return $default(_that.id,_that.bookingReference,_that.userId,_that.customerName,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id, @JsonKey(name: 'booking_reference')  String? bookingReference, @JsonKey(name: 'user_id')  int? userId, @JsonKey(name: 'customer_name')  String? customerName, @JsonKey(name: 'customer_email')  String? customerEmail, @JsonKey(name: 'customer_phone')  String? customerPhone,  int? pax, @JsonKey(name: 'event_date')  DateTime? eventDate, @JsonKey(name: 'event_time')  String? eventTime, @JsonKey(name: 'venue_address')  String? venueAddress, @JsonKey(name: 'payment_method')  String? paymentMethod,  String? status, @JsonKey(name: 'checkout_url')  String? checkoutUrl, @JsonKey(name: 'inquiry_id')  int? inquiryId,  Package? package,  List<Scent>? scents)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id, @JsonKey(name: 'booking_reference')  String? bookingReference, @JsonKey(name: 'user_id')  int? userId, @JsonKey(name: 'customer_name')  String? customerName, @JsonKey(name: 'customer_email')  String? customerEmail, @JsonKey(name: 'customer_phone')  String? customerPhone,  int? pax, @JsonKey(name: 'event_date')  DateTime? eventDate, @JsonKey(name: 'event_time')  String? eventTime, @JsonKey(name: 'venue_address')  String? venueAddress, @JsonKey(name: 'payment_method')  String? paymentMethod,  String? status, @JsonKey(name: 'checkout_url')  String? checkoutUrl, @JsonKey(name: 'inquiry_id')  int? inquiryId, @JsonKey(name: 'consent_privacy_version')  String? consentPrivacyVersion, @JsonKey(name: 'consented_at')  DateTime? consentedAt,  Package? package,  List<Scent>? scents)  $default,) {final _that = this;
 switch (_that) {
 case _Booking():
-return $default(_that.id,_that.bookingReference,_that.userId,_that.customerName,_that.customerEmail,_that.customerPhone,_that.pax,_that.eventDate,_that.eventTime,_that.venueAddress,_that.paymentMethod,_that.status,_that.checkoutUrl,_that.inquiryId,_that.package,_that.scents);case _:
+return $default(_that.id,_that.bookingReference,_that.userId,_that.customerName,_that.customerEmail,_that.customerPhone,_that.pax,_that.eventDate,_that.eventTime,_that.venueAddress,_that.paymentMethod,_that.status,_that.checkoutUrl,_that.inquiryId,_that.consentPrivacyVersion,_that.consentedAt,_that.package,_that.scents);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -221,10 +223,10 @@ return $default(_that.id,_that.bookingReference,_that.userId,_that.customerName,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id, @JsonKey(name: 'booking_reference')  String? bookingReference, @JsonKey(name: 'user_id')  int? userId, @JsonKey(name: 'customer_name')  String? customerName, @JsonKey(name: 'customer_email')  String? customerEmail, @JsonKey(name: 'customer_phone')  String? customerPhone,  int? pax, @JsonKey(name: 'event_date')  DateTime? eventDate, @JsonKey(name: 'event_time')  String? eventTime, @JsonKey(name: 'venue_address')  String? venueAddress, @JsonKey(name: 'payment_method')  String? paymentMethod,  String? status, @JsonKey(name: 'checkout_url')  String? checkoutUrl, @JsonKey(name: 'inquiry_id')  int? inquiryId,  Package? package,  List<Scent>? scents)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id, @JsonKey(name: 'booking_reference')  String? bookingReference, @JsonKey(name: 'user_id')  int? userId, @JsonKey(name: 'customer_name')  String? customerName, @JsonKey(name: 'customer_email')  String? customerEmail, @JsonKey(name: 'customer_phone')  String? customerPhone,  int? pax, @JsonKey(name: 'event_date')  DateTime? eventDate, @JsonKey(name: 'event_time')  String? eventTime, @JsonKey(name: 'venue_address')  String? venueAddress, @JsonKey(name: 'payment_method')  String? paymentMethod,  String? status, @JsonKey(name: 'checkout_url')  String? checkoutUrl, @JsonKey(name: 'inquiry_id')  int? inquiryId, @JsonKey(name: 'consent_privacy_version')  String? consentPrivacyVersion, @JsonKey(name: 'consented_at')  DateTime? consentedAt,  Package? package,  List<Scent>? scents)?  $default,) {final _that = this;
 switch (_that) {
 case _Booking() when $default != null:
-return $default(_that.id,_that.bookingReference,_that.userId,_that.customerName,_that.customerEmail,_that.customerPhone,_that.pax,_that.eventDate,_that.eventTime,_that.venueAddress,_that.paymentMethod,_that.status,_that.checkoutUrl,_that.inquiryId,_that.package,_that.scents);case _:
+return $default(_that.id,_that.bookingReference,_that.userId,_that.customerName,_that.customerEmail,_that.customerPhone,_that.pax,_that.eventDate,_that.eventTime,_that.venueAddress,_that.paymentMethod,_that.status,_that.checkoutUrl,_that.inquiryId,_that.consentPrivacyVersion,_that.consentedAt,_that.package,_that.scents);case _:
   return null;
 
 }
@@ -236,7 +238,7 @@ return $default(_that.id,_that.bookingReference,_that.userId,_that.customerName,
 @JsonSerializable()
 
 class _Booking implements Booking {
-  const _Booking({this.id, @JsonKey(name: 'booking_reference') this.bookingReference, @JsonKey(name: 'user_id') this.userId, @JsonKey(name: 'customer_name') this.customerName, @JsonKey(name: 'customer_email') this.customerEmail, @JsonKey(name: 'customer_phone') this.customerPhone, this.pax, @JsonKey(name: 'event_date') this.eventDate, @JsonKey(name: 'event_time') this.eventTime, @JsonKey(name: 'venue_address') this.venueAddress, @JsonKey(name: 'payment_method') this.paymentMethod, this.status, @JsonKey(name: 'checkout_url') this.checkoutUrl, @JsonKey(name: 'inquiry_id') this.inquiryId, this.package, final  List<Scent>? scents}): _scents = scents;
+  const _Booking({this.id, @JsonKey(name: 'booking_reference') this.bookingReference, @JsonKey(name: 'user_id') this.userId, @JsonKey(name: 'customer_name') this.customerName, @JsonKey(name: 'customer_email') this.customerEmail, @JsonKey(name: 'customer_phone') this.customerPhone, this.pax, @JsonKey(name: 'event_date') this.eventDate, @JsonKey(name: 'event_time') this.eventTime, @JsonKey(name: 'venue_address') this.venueAddress, @JsonKey(name: 'payment_method') this.paymentMethod, this.status, @JsonKey(name: 'checkout_url') this.checkoutUrl, @JsonKey(name: 'inquiry_id') this.inquiryId, @JsonKey(name: 'consent_privacy_version') this.consentPrivacyVersion, @JsonKey(name: 'consented_at') this.consentedAt, this.package, final  List<Scent>? scents}): _scents = scents;
   factory _Booking.fromJson(Map<String, dynamic> json) => _$BookingFromJson(json);
 
 @override final  int? id;
@@ -253,6 +255,8 @@ class _Booking implements Booking {
 @override final  String? status;
 @override@JsonKey(name: 'checkout_url') final  String? checkoutUrl;
 @override@JsonKey(name: 'inquiry_id') final  int? inquiryId;
+@override@JsonKey(name: 'consent_privacy_version') final  String? consentPrivacyVersion;
+@override@JsonKey(name: 'consented_at') final  DateTime? consentedAt;
 @override final  Package? package;
  final  List<Scent>? _scents;
 @override List<Scent>? get scents {
@@ -277,16 +281,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Booking&&(identical(other.id, id) || other.id == id)&&(identical(other.bookingReference, bookingReference) || other.bookingReference == bookingReference)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.customerName, customerName) || other.customerName == customerName)&&(identical(other.customerEmail, customerEmail) || other.customerEmail == customerEmail)&&(identical(other.customerPhone, customerPhone) || other.customerPhone == customerPhone)&&(identical(other.pax, pax) || other.pax == pax)&&(identical(other.eventDate, eventDate) || other.eventDate == eventDate)&&(identical(other.eventTime, eventTime) || other.eventTime == eventTime)&&(identical(other.venueAddress, venueAddress) || other.venueAddress == venueAddress)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.status, status) || other.status == status)&&(identical(other.checkoutUrl, checkoutUrl) || other.checkoutUrl == checkoutUrl)&&(identical(other.inquiryId, inquiryId) || other.inquiryId == inquiryId)&&(identical(other.package, package) || other.package == package)&&const DeepCollectionEquality().equals(other._scents, _scents));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Booking&&(identical(other.id, id) || other.id == id)&&(identical(other.bookingReference, bookingReference) || other.bookingReference == bookingReference)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.customerName, customerName) || other.customerName == customerName)&&(identical(other.customerEmail, customerEmail) || other.customerEmail == customerEmail)&&(identical(other.customerPhone, customerPhone) || other.customerPhone == customerPhone)&&(identical(other.pax, pax) || other.pax == pax)&&(identical(other.eventDate, eventDate) || other.eventDate == eventDate)&&(identical(other.eventTime, eventTime) || other.eventTime == eventTime)&&(identical(other.venueAddress, venueAddress) || other.venueAddress == venueAddress)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.status, status) || other.status == status)&&(identical(other.checkoutUrl, checkoutUrl) || other.checkoutUrl == checkoutUrl)&&(identical(other.inquiryId, inquiryId) || other.inquiryId == inquiryId)&&(identical(other.consentPrivacyVersion, consentPrivacyVersion) || other.consentPrivacyVersion == consentPrivacyVersion)&&(identical(other.consentedAt, consentedAt) || other.consentedAt == consentedAt)&&(identical(other.package, package) || other.package == package)&&const DeepCollectionEquality().equals(other._scents, _scents));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,bookingReference,userId,customerName,customerEmail,customerPhone,pax,eventDate,eventTime,venueAddress,paymentMethod,status,checkoutUrl,inquiryId,package,const DeepCollectionEquality().hash(_scents));
+int get hashCode => Object.hash(runtimeType,id,bookingReference,userId,customerName,customerEmail,customerPhone,pax,eventDate,eventTime,venueAddress,paymentMethod,status,checkoutUrl,inquiryId,consentPrivacyVersion,consentedAt,package,const DeepCollectionEquality().hash(_scents));
 
 @override
 String toString() {
-  return 'Booking(id: $id, bookingReference: $bookingReference, userId: $userId, customerName: $customerName, customerEmail: $customerEmail, customerPhone: $customerPhone, pax: $pax, eventDate: $eventDate, eventTime: $eventTime, venueAddress: $venueAddress, paymentMethod: $paymentMethod, status: $status, checkoutUrl: $checkoutUrl, inquiryId: $inquiryId, package: $package, scents: $scents)';
+  return 'Booking(id: $id, bookingReference: $bookingReference, userId: $userId, customerName: $customerName, customerEmail: $customerEmail, customerPhone: $customerPhone, pax: $pax, eventDate: $eventDate, eventTime: $eventTime, venueAddress: $venueAddress, paymentMethod: $paymentMethod, status: $status, checkoutUrl: $checkoutUrl, inquiryId: $inquiryId, consentPrivacyVersion: $consentPrivacyVersion, consentedAt: $consentedAt, package: $package, scents: $scents)';
 }
 
 
@@ -297,7 +301,7 @@ abstract mixin class _$BookingCopyWith<$Res> implements $BookingCopyWith<$Res> {
   factory _$BookingCopyWith(_Booking value, $Res Function(_Booking) _then) = __$BookingCopyWithImpl;
 @override @useResult
 $Res call({
- int? id,@JsonKey(name: 'booking_reference') String? bookingReference,@JsonKey(name: 'user_id') int? userId,@JsonKey(name: 'customer_name') String? customerName,@JsonKey(name: 'customer_email') String? customerEmail,@JsonKey(name: 'customer_phone') String? customerPhone, int? pax,@JsonKey(name: 'event_date') DateTime? eventDate,@JsonKey(name: 'event_time') String? eventTime,@JsonKey(name: 'venue_address') String? venueAddress,@JsonKey(name: 'payment_method') String? paymentMethod, String? status,@JsonKey(name: 'checkout_url') String? checkoutUrl,@JsonKey(name: 'inquiry_id') int? inquiryId, Package? package, List<Scent>? scents
+ int? id,@JsonKey(name: 'booking_reference') String? bookingReference,@JsonKey(name: 'user_id') int? userId,@JsonKey(name: 'customer_name') String? customerName,@JsonKey(name: 'customer_email') String? customerEmail,@JsonKey(name: 'customer_phone') String? customerPhone, int? pax,@JsonKey(name: 'event_date') DateTime? eventDate,@JsonKey(name: 'event_time') String? eventTime,@JsonKey(name: 'venue_address') String? venueAddress,@JsonKey(name: 'payment_method') String? paymentMethod, String? status,@JsonKey(name: 'checkout_url') String? checkoutUrl,@JsonKey(name: 'inquiry_id') int? inquiryId,@JsonKey(name: 'consent_privacy_version') String? consentPrivacyVersion,@JsonKey(name: 'consented_at') DateTime? consentedAt, Package? package, List<Scent>? scents
 });
 
 
@@ -314,7 +318,7 @@ class __$BookingCopyWithImpl<$Res>
 
 /// Create a copy of Booking
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? bookingReference = freezed,Object? userId = freezed,Object? customerName = freezed,Object? customerEmail = freezed,Object? customerPhone = freezed,Object? pax = freezed,Object? eventDate = freezed,Object? eventTime = freezed,Object? venueAddress = freezed,Object? paymentMethod = freezed,Object? status = freezed,Object? checkoutUrl = freezed,Object? inquiryId = freezed,Object? package = freezed,Object? scents = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? bookingReference = freezed,Object? userId = freezed,Object? customerName = freezed,Object? customerEmail = freezed,Object? customerPhone = freezed,Object? pax = freezed,Object? eventDate = freezed,Object? eventTime = freezed,Object? venueAddress = freezed,Object? paymentMethod = freezed,Object? status = freezed,Object? checkoutUrl = freezed,Object? inquiryId = freezed,Object? consentPrivacyVersion = freezed,Object? consentedAt = freezed,Object? package = freezed,Object? scents = freezed,}) {
   return _then(_Booking(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,bookingReference: freezed == bookingReference ? _self.bookingReference : bookingReference // ignore: cast_nullable_to_non_nullable
@@ -330,7 +334,9 @@ as String?,paymentMethod: freezed == paymentMethod ? _self.paymentMethod : payme
 as String?,status: freezed == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String?,checkoutUrl: freezed == checkoutUrl ? _self.checkoutUrl : checkoutUrl // ignore: cast_nullable_to_non_nullable
 as String?,inquiryId: freezed == inquiryId ? _self.inquiryId : inquiryId // ignore: cast_nullable_to_non_nullable
-as int?,package: freezed == package ? _self.package : package // ignore: cast_nullable_to_non_nullable
+as int?,consentPrivacyVersion: freezed == consentPrivacyVersion ? _self.consentPrivacyVersion : consentPrivacyVersion // ignore: cast_nullable_to_non_nullable
+as String?,consentedAt: freezed == consentedAt ? _self.consentedAt : consentedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,package: freezed == package ? _self.package : package // ignore: cast_nullable_to_non_nullable
 as Package?,scents: freezed == scents ? _self._scents : scents // ignore: cast_nullable_to_non_nullable
 as List<Scent>?,
   ));

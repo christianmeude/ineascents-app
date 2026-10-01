@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/index.dart';
+import '../config/privacy.dart';
 import 'package:dio/dio.dart';
 import '../src/providers/core_providers.dart';
 import '../src/services/token_storage.dart';
@@ -99,13 +100,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
           password: password,
         ),
       );
-      if (response.accessToken != null) {
-        await _tokenStorage.saveToken(response.accessToken!);
-      }
-      // C95: pending registration returns zero token — stay logged out so
-      // the register screen routes to /verify-email instead of /home.
+      // C159: register issues no session (pending verification) — stay
+      // logged out so the screen routes to /verify-email instead of /home.
       state = state.copyWith(
-        isLoggedIn: response.accessToken != null,
+        isLoggedIn: false,
         user: response.user,
         isLoading: false,
       );
@@ -140,6 +138,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
+    // C159: revoke the server session first; local sign-out always runs
+    // so offline logout still works (a dead token is useless anyway).
+    try {
+      await _apiClient.auth.postApiLogout();
+    } catch (_) {
+      // Best-effort: fall through to local cleanup.
+    }
     await _tokenStorage.deleteToken();
     state = AuthState();
   }
@@ -554,6 +559,9 @@ class BookingFlowNotifier extends StateNotifier<BookingFlowState> {
           scentIds: state.selectedScentIds.isNotEmpty
               ? state.selectedScentIds
               : null,
+          // C159: booking consent pins the bundled policy version (server
+          // rejects stale versions; bump privacy.dart with the backend).
+          consentPrivacyVersion: privacyPolicyVersion,
         ),
       );
 

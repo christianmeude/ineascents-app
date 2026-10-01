@@ -375,6 +375,14 @@ class _SettingsColumn extends StatelessWidget {
               const _SettingDivider(),
 
               _ProfileSettingTile(
+                icon: Icons.privacy_tip_outlined,
+                title: 'Privacy Policy',
+                onTap: () => context.push('/privacy'),
+              ),
+
+              const _SettingDivider(),
+
+              _ProfileSettingTile(
                 icon: Icons.logout_rounded,
                 title: 'Logout',
                 isDestructive: true,

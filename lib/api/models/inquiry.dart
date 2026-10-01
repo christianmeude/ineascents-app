@@ -19,6 +19,10 @@ abstract class Inquiry with _$Inquiry {
     String? message,
     String? status,
     bool? archived,
+    @JsonKey(name: 'consent_privacy_version')
+    String? consentPrivacyVersion,
+    @JsonKey(name: 'consented_at')
+    DateTime? consentedAt,
   }) = _Inquiry;
   
   factory Inquiry.fromJson(Map<String, Object?> json) => _$InquiryFromJson(json);

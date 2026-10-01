@@ -5,6 +5,7 @@
 // Clients
 export 'auth/auth_api_client.dart';
 export 'profile/profile_api_client.dart';
+export 'data_rights/data_rights_api_client.dart';
 export 'availability/availability_api_client.dart';
 export 'bookings/bookings_api_client.dart';
 export 'inquiries/inquiries_api_client.dart';
@@ -16,7 +17,11 @@ export 'models/booking.dart';
 export 'models/inquiry.dart';
 export 'models/package.dart';
 export 'models/scent.dart';
+export 'models/post_api_register_response.dart';
 export 'models/api_register_request_body.dart';
+export 'models/api_register_verify_request_body.dart';
+export 'models/post_api_register_resend_response.dart';
+export 'models/api_register_resend_request_body.dart';
 export 'models/api_login_request_body.dart';
 export 'models/put_api_user_response.dart';
 export 'models/api_user_request_body.dart';

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ApiInquiriesRequestBody {
 
- String get name; String get email; String get phone;@JsonKey(name: 'event_date') DateTime? get eventDate; String? get message;
+ String get name; String get email; String get phone;@JsonKey(name: 'consent_privacy_version') String get consentPrivacyVersion;@JsonKey(name: 'event_date') DateTime? get eventDate; String? get message;
 /// Create a copy of ApiInquiriesRequestBody
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ApiInquiriesRequestBodyCopyWith<ApiInquiriesRequestBody> get copyWith => _$ApiI
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ApiInquiriesRequestBody&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.eventDate, eventDate) || other.eventDate == eventDate)&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ApiInquiriesRequestBody&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.consentPrivacyVersion, consentPrivacyVersion) || other.consentPrivacyVersion == consentPrivacyVersion)&&(identical(other.eventDate, eventDate) || other.eventDate == eventDate)&&(identical(other.message, message) || other.message == message));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,email,phone,eventDate,message);
+int get hashCode => Object.hash(runtimeType,name,email,phone,consentPrivacyVersion,eventDate,message);
 
 @override
 String toString() {
-  return 'ApiInquiriesRequestBody(name: $name, email: $email, phone: $phone, eventDate: $eventDate, message: $message)';
+  return 'ApiInquiriesRequestBody(name: $name, email: $email, phone: $phone, consentPrivacyVersion: $consentPrivacyVersion, eventDate: $eventDate, message: $message)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ApiInquiriesRequestBodyCopyWith<$Res>  {
   factory $ApiInquiriesRequestBodyCopyWith(ApiInquiriesRequestBody value, $Res Function(ApiInquiriesRequestBody) _then) = _$ApiInquiriesRequestBodyCopyWithImpl;
 @useResult
 $Res call({
- String name, String email, String phone,@JsonKey(name: 'event_date') DateTime? eventDate, String? message
+ String name, String email, String phone,@JsonKey(name: 'consent_privacy_version') String consentPrivacyVersion,@JsonKey(name: 'event_date') DateTime? eventDate, String? message
 });
 
 
@@ -65,11 +65,12 @@ class _$ApiInquiriesRequestBodyCopyWithImpl<$Res>
 
 /// Create a copy of ApiInquiriesRequestBody
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? email = null,Object? phone = null,Object? eventDate = freezed,Object? message = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? email = null,Object? phone = null,Object? consentPrivacyVersion = null,Object? eventDate = freezed,Object? message = freezed,}) {
   return _then(_self.copyWith(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String,consentPrivacyVersion: null == consentPrivacyVersion ? _self.consentPrivacyVersion : consentPrivacyVersion // ignore: cast_nullable_to_non_nullable
 as String,eventDate: freezed == eventDate ? _self.eventDate : eventDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -157,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String email,  String phone, @JsonKey(name: 'event_date')  DateTime? eventDate,  String? message)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String email,  String phone, @JsonKey(name: 'consent_privacy_version')  String consentPrivacyVersion, @JsonKey(name: 'event_date')  DateTime? eventDate,  String? message)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ApiInquiriesRequestBody() when $default != null:
-return $default(_that.name,_that.email,_that.phone,_that.eventDate,_that.message);case _:
+return $default(_that.name,_that.email,_that.phone,_that.consentPrivacyVersion,_that.eventDate,_that.message);case _:
   return orElse();
 
 }
@@ -178,10 +179,10 @@ return $default(_that.name,_that.email,_that.phone,_that.eventDate,_that.message
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String email,  String phone, @JsonKey(name: 'event_date')  DateTime? eventDate,  String? message)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String email,  String phone, @JsonKey(name: 'consent_privacy_version')  String consentPrivacyVersion, @JsonKey(name: 'event_date')  DateTime? eventDate,  String? message)  $default,) {final _that = this;
 switch (_that) {
 case _ApiInquiriesRequestBody():
-return $default(_that.name,_that.email,_that.phone,_that.eventDate,_that.message);case _:
+return $default(_that.name,_that.email,_that.phone,_that.consentPrivacyVersion,_that.eventDate,_that.message);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +199,10 @@ return $default(_that.name,_that.email,_that.phone,_that.eventDate,_that.message
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String email,  String phone, @JsonKey(name: 'event_date')  DateTime? eventDate,  String? message)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String email,  String phone, @JsonKey(name: 'consent_privacy_version')  String consentPrivacyVersion, @JsonKey(name: 'event_date')  DateTime? eventDate,  String? message)?  $default,) {final _that = this;
 switch (_that) {
 case _ApiInquiriesRequestBody() when $default != null:
-return $default(_that.name,_that.email,_that.phone,_that.eventDate,_that.message);case _:
+return $default(_that.name,_that.email,_that.phone,_that.consentPrivacyVersion,_that.eventDate,_that.message);case _:
   return null;
 
 }
@@ -213,12 +214,13 @@ return $default(_that.name,_that.email,_that.phone,_that.eventDate,_that.message
 @JsonSerializable()
 
 class _ApiInquiriesRequestBody implements ApiInquiriesRequestBody {
-  const _ApiInquiriesRequestBody({required this.name, required this.email, required this.phone, @JsonKey(name: 'event_date') this.eventDate, this.message});
+  const _ApiInquiriesRequestBody({required this.name, required this.email, required this.phone, @JsonKey(name: 'consent_privacy_version') required this.consentPrivacyVersion, @JsonKey(name: 'event_date') this.eventDate, this.message});
   factory _ApiInquiriesRequestBody.fromJson(Map<String, dynamic> json) => _$ApiInquiriesRequestBodyFromJson(json);
 
 @override final  String name;
 @override final  String email;
 @override final  String phone;
+@override@JsonKey(name: 'consent_privacy_version') final  String consentPrivacyVersion;
 @override@JsonKey(name: 'event_date') final  DateTime? eventDate;
 @override final  String? message;
 
@@ -235,16 +237,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ApiInquiriesRequestBody&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.eventDate, eventDate) || other.eventDate == eventDate)&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ApiInquiriesRequestBody&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.consentPrivacyVersion, consentPrivacyVersion) || other.consentPrivacyVersion == consentPrivacyVersion)&&(identical(other.eventDate, eventDate) || other.eventDate == eventDate)&&(identical(other.message, message) || other.message == message));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,email,phone,eventDate,message);
+int get hashCode => Object.hash(runtimeType,name,email,phone,consentPrivacyVersion,eventDate,message);
 
 @override
 String toString() {
-  return 'ApiInquiriesRequestBody(name: $name, email: $email, phone: $phone, eventDate: $eventDate, message: $message)';
+  return 'ApiInquiriesRequestBody(name: $name, email: $email, phone: $phone, consentPrivacyVersion: $consentPrivacyVersion, eventDate: $eventDate, message: $message)';
 }
 
 
@@ -255,7 +257,7 @@ abstract mixin class _$ApiInquiriesRequestBodyCopyWith<$Res> implements $ApiInqu
   factory _$ApiInquiriesRequestBodyCopyWith(_ApiInquiriesRequestBody value, $Res Function(_ApiInquiriesRequestBody) _then) = __$ApiInquiriesRequestBodyCopyWithImpl;
 @override @useResult
 $Res call({
- String name, String email, String phone,@JsonKey(name: 'event_date') DateTime? eventDate, String? message
+ String name, String email, String phone,@JsonKey(name: 'consent_privacy_version') String consentPrivacyVersion,@JsonKey(name: 'event_date') DateTime? eventDate, String? message
 });
 
 
@@ -272,11 +274,12 @@ class __$ApiInquiriesRequestBodyCopyWithImpl<$Res>
 
 /// Create a copy of ApiInquiriesRequestBody
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? email = null,Object? phone = null,Object? eventDate = freezed,Object? message = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? email = null,Object? phone = null,Object? consentPrivacyVersion = null,Object? eventDate = freezed,Object? message = freezed,}) {
   return _then(_ApiInquiriesRequestBody(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String,consentPrivacyVersion: null == consentPrivacyVersion ? _self.consentPrivacyVersion : consentPrivacyVersion // ignore: cast_nullable_to_non_nullable
 as String,eventDate: freezed == eventDate ? _self.eventDate : eventDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String?,

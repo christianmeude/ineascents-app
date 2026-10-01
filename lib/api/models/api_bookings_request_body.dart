@@ -25,6 +25,8 @@ abstract class ApiBookingsRequestBody with _$ApiBookingsRequestBody {
     required String venueAddress,
     @JsonKey(name: 'payment_method')
     required PaymentMethod paymentMethod,
+    @JsonKey(name: 'consent_privacy_version')
+    required String consentPrivacyVersion,
     @JsonKey(name: 'customer_phone')
     String? customerPhone,
     @JsonKey(name: 'event_time')

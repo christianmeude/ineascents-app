@@ -101,10 +101,14 @@ class FakeApiBackend {
   /// When true, POST /api/register/resend answers 429.
   bool failRegisterResendCooldown = false;
 
+  /// When true, POST /api/logout answers 500 (C159: offline-proof logout).
+  bool failLogout = false;
+
   int registerCallCount = 0;
   int registerVerifyCallCount = 0;
   int registerResendCallCount = 0;
   int loginCallCount = 0;
+  int logoutCallCount = 0;
 
   int get _id => 999;
   String get _reference => 'IN-2026-000123';
@@ -166,6 +170,14 @@ class FakeHttpClientAdapter implements HttpClientAdapter {
 
     if (method == 'GET' && path == '/api/user') {
       return _json(jsonEncode(_profileJson()));
+    }
+
+    if (method == 'POST' && path == '/api/logout') {
+      backend.logoutCallCount++;
+      if (backend.failLogout) {
+        return _status(500, '{"detail":"logout unavailable"}');
+      }
+      return _json('{"message":"Logged out."}');
     }
 
     if (method == 'POST' && path == '/api/bookings') {

@@ -12,6 +12,7 @@ _ApiInquiriesRequestBody _$ApiInquiriesRequestBodyFromJson(
   name: json['name'] as String,
   email: json['email'] as String,
   phone: json['phone'] as String,
+  consentPrivacyVersion: json['consent_privacy_version'] as String,
   eventDate: json['event_date'] == null
       ? null
       : DateTime.parse(json['event_date'] as String),
@@ -24,6 +25,7 @@ Map<String, dynamic> _$ApiInquiriesRequestBodyToJson(
   'name': instance.name,
   'email': instance.email,
   'phone': instance.phone,
+  'consent_privacy_version': instance.consentPrivacyVersion,
   'event_date': instance.eventDate?.toIso8601String(),
   'message': instance.message,
 };

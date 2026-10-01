@@ -15,8 +15,19 @@ import '../config/theme.dart';
 /// server failures (safe to retry), false for validation copy (fix the
 /// form instead). Callers pass the result as `transient` to
 /// [showAppError] and as `onRetry` to [FormErrorSummary].
+///
+/// C162: register mailer-down copy — transient/500 server failures during
+/// registration surface this short friendly line (with Retry) instead of
+/// raw `stream_socket`/exception text.
+const registerVerificationMailCopy =
+    'Something went wrong sending the verification email. Please retry.';
+
 bool isTransientErrorMessage(String message) {
   final m = message.toLowerCase();
+  // Note (C162): no bare `exception` match — Dio's own badResponse
+  // message always contains "This exception was thrown", which would
+  // flag every mapped 4xx (validation) failure as retryable. Raw
+  // mailer blobs still match via socket/mailer/500/server-error.
   return m.contains('could not connect') ||
       m.contains('taking too long') ||
       m.contains('check your internet') ||
@@ -26,8 +37,13 @@ bool isTransientErrorMessage(String message) {
       m.contains('timeout') ||
       m.contains('timed out') ||
       m.contains('server error') ||
+      m.contains('internal server error') ||
       m.contains('unexpected network') ||
-      m.contains('socket');
+      m.contains('socket') ||
+      m.contains('stream_socket') ||
+      m.contains('mailer') ||
+      m.contains('verification email') ||
+      m.contains('500');
 }
 
 /// C52: dark-aware error text (mirrors the former per-screen values).

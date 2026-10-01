@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/index.dart';
 import '../config/theme.dart';
 import '../widgets/index.dart';
+import 'auth_error_copy.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -55,13 +56,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       } else if (next.errorMessage != null) {
         // C52: form-level failure renders in-card (see build); only a
         // transient failure additionally surfaces a toast with Retry.
-        final message =
+        // C162: sanitize both surfaces — raw transient/server blobs
+        // (mailer-down 500, stream_socket/exception text) render as the
+        // short friendly line, never verbatim.
+        final raw =
             next.errorMessage ??
             "That didn't work. Check your details and try again.";
-        if (isTransientErrorMessage(message)) {
+        final message = friendlyRegisterMessage(raw);
+        if (isTransientErrorMessage(raw) ||
+            isTransientErrorMessage(message)) {
           showAppError(
             context,
-            // P6 (Q8): friendly fallback; provider messages pass through.
+            // C162: sanitized friendly copy; raw server words stay in logs.
             message: message,
             transient: true,
             onRetry: () => ref
@@ -113,9 +119,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                         // C52: form-level failure renders in-card; Retry
                         // only for transient failures (toast covers those).
+                        // C162: in-card copy is sanitized — raw 500/mailer
+                        // blobs render as the friendly line, never verbatim.
                         if (authState.errorMessage != null) ...[
                           FormErrorSummary(
-                            message: authState.errorMessage!,
+                            message: friendlyRegisterMessage(
+                              authState.errorMessage!,
+                            ),
                             onRetry: isTransientErrorMessage(
                               authState.errorMessage!,
                             )

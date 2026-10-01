@@ -25,6 +25,11 @@ void showAppError(
   bool? transient,
 }) {
   final isTransient = transient ?? isTransientErrorMessage(message);
+  // C162: never render raw server/exception blobs in the toast. Raw
+  // mailer/socket shapes fall back to the register-friendly line when
+  // they look mail-related, else to the generic line. Already-friendly
+  // copy passes through untouched.
+  final displayMessage = _sanitizedToastMessage(message);
   final messenger = ScaffoldMessenger.of(context);
   final hasRetry = onRetry != null && isTransient;
   final hasAction = onAction != null && actionLabel != null;
@@ -48,7 +53,7 @@ void showAppError(
         // C31 plum/cream — no restyle.
         content: ToastEntry(
           child: Text(
-            message,
+            displayMessage,
             style: const TextStyle(color: AppTheme.onPrimaryButton),
             softWrap: true,
           ),
@@ -78,4 +83,37 @@ void hideAppError(BuildContext context) {
   messenger
     ..clearSnackBars()
     ..clearMaterialBanners();
+}
+
+/// C162: toast-level guard against raw server/exception blobs. Returns
+/// [message] verbatim unless it looks like a raw failure (socket/
+/// stack/mailer shapes, or an `exception` blob tied to mail/socket/500
+/// markers), in which case it falls back to the register-friendly line
+/// for mail-related blobs or the generic line otherwise. Friendly and
+/// validation copy never rewrite — note Dio's own badResponse wrapper
+/// ("This exception was thrown ... status code of 422") must pass
+/// through, so a bare `exception` match never qualifies alone.
+String _sanitizedToastMessage(String message) {
+  if (message == registerVerificationMailCopy) return message;
+  final m = message.toLowerCase();
+  final looksMail = m.contains('stream_socket') ||
+      m.contains('mailer') ||
+      m.contains('smtp') ||
+      m.contains('verification') ||
+      m.contains('ssl') ||
+      m.contains('500');
+  final hasException =
+      m.contains('exception') || m.contains('dioexception');
+  final isRaw = m.contains('stream_socket') ||
+      m.contains('socketexception') ||
+      m.contains('dioexception') ||
+      m.contains('stack trace') ||
+      m.contains('#0 ') ||
+      m.contains('smtp') ||
+      (hasException && looksMail) ||
+      (m.contains('mailer') && !m.contains('verification email'));
+  if (!isRaw) return message;
+  return looksMail
+      ? registerVerificationMailCopy
+      : 'Something went wrong. Please try again.';
 }

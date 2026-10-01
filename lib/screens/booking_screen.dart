@@ -2379,61 +2379,120 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Wrap(
+                Column(
                   spacing: 8,
-                  runSpacing: 8,
                   children:
                       [
                         {
                           'id': 'online',
                           'label': 'Online',
-                          'color': const Color(0xFFEB001B),
+                          'sublabel': 'PayMongo secure checkout',
+                          'color': plum,
+                          'icon': Icons.qr_code_2,
                         },
                         {
                           'id': 'cash',
                           'label': 'Cash',
                           // C77: same brand treatment as the online chip.
-                          'color': const Color(0xFFEB001B),
+                          'sublabel': 'Pay on event day · admin confirms',
+                          'color': plum,
+                          'icon': Icons.payments_rounded,
                         },
                       ].map((m) {
                         final isSel = _paymentMethod == m['id'];
+                        final methodColor = m['color'] as Color;
                         return SizedBox(
-                          width: (MediaQuery.of(context).size.width - 138) / 2,
+                          width: double.infinity,
                           child: InkWell(
                             onTap: () {
                               ref
                                   .read(bookingFlowProvider.notifier)
                                   .setPaymentMethod(m['id'] as String);
                             },
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(12),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              alignment: Alignment.center,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 12,
+                              ),
                               decoration: BoxDecoration(
                                 color: isSel
-                                    ? (m['color'] as Color).withValues(
-                                        alpha: 0.15,
-                                      )
+                                    ? methodColor.withValues(alpha: 0.08)
                                     : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(12),
                                 // P7 (Q4): constant width; color signals state.
                                 border: Border.all(
                                   color: isSel
-                                      ? (m['color'] as Color)
+                                      ? methodColor
                                       : _surfaceBorder,
-                                  width: 1.0,
+                                  width: isSel ? 2.0 : 1.0,
                                 ),
+                                boxShadow: isSel
+                                    ? [
+                                        BoxShadow(
+                                          color: methodColor.withValues(
+                                            alpha: 0.18,
+                                          ),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : null,
                               ),
-                              child: Text(
-                                m['label'] as String,
-                                style: TextStyle(
-                                  // C33: title token (AAA 4.5+ UI).
-                                  color: _title,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: methodColor.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      m['icon'] as IconData,
+                                      color: methodColor,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          m['label'] as String,
+                                          style: TextStyle(
+                                            // C33: title token (AAA 4.5+ UI).
+                                            color: _title,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Text(
+                                          m['sublabel'] as String,
+                                          style: TextStyle(
+                                            color: _title,
+                                            fontSize: 11,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    isSel
+                                        ? Icons.check_circle_rounded
+                                        : Icons
+                                              .radio_button_unchecked_rounded,
+                                    size: 18,
+                                    color: isSel ? methodColor : _title,
+                                  ),
+                                ],
                               ),
                             ),
                           ),

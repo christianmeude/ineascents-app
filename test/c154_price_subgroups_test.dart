@@ -95,9 +95,10 @@ void main() {
       expect(betaY, lessThan(freebiesY));
       expect(freebiesY, lessThan(gammaY));
 
-      // Right-column amounts unchanged.
-      expect(find.text('Included'), findsNWidgets(2));
-      expect(find.text('Free'), findsOneWidget);
+      // C155: distilled rows — no per-row Included/Free trailing
+      // texts (redundant with group headers); amounts live on Pax + Total.
+      expect(find.text('Included'), findsNothing);
+      expect(find.text('Free'), findsNothing);
 
       // Totals unchanged.
       expect(

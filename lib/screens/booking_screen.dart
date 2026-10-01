@@ -2252,6 +2252,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                   ],
                 ),
                 const SizedBox(height: 15),
+                // C154: two labeled subgroups mirroring the Details card
+                // (Inclusions:/Freebies:) — rows keep Included/Free amounts.
                 Text(
                   'Inclusions:',
                   style: TextStyle(fontSize: 12, color: _body),
@@ -2259,14 +2261,53 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 const SizedBox(height: 10),
                 // Live package data — same source as the desktop summary.
                 // No per-item prices exist; rows show Included/Free.
-                ...[
-                  ...?package.inclusions?.map(
-                    (label) => {'label': label, 'val': 'Included'},
-                  ),
-                  ...?package.freebies?.map(
-                    (label) => {'label': label, 'val': 'Free'},
-                  ),
-                ].map((item) {
+                ...?package.inclusions?.map(
+                  (label) => {'label': label, 'val': 'Included'},
+                ).map((item) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '• ${item['label']}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: _title,
+                              height: 1.35,
+                            ),
+                            softWrap: true,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          item['val']!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: _body,
+                            height: 1.35,
+                            fontFeatures: const [
+                              FontFeature.tabularFigures(),
+                            ],
+                          ),
+                          softWrap: true,
+                          textAlign: TextAlign.end,
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                const SizedBox(height: 10),
+                Text(
+                  'Freebies:',
+                  style: TextStyle(fontSize: 12, color: _body),
+                ),
+                const SizedBox(height: 10),
+                ...?package.freebies?.map(
+                  (label) => {'label': label, 'val': 'Free'},
+                ).map((item) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(

@@ -1,8 +1,16 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
+import 'package:flutter/material.dart';
 import '../config/theme.dart';
 import 'inline_errors.dart';
 import 'micro_interactions.dart';
+
+/// C164 test hook: forces the web overlay-banner path in widget tests
+/// where [kIsWeb] is always false on the VM. Null (default) uses the
+/// real `kIsWeb` gate. Never set outside tests.
+@visibleForTesting
+bool? debugForceWebBanner;
 
 /// C52: app-wide error display is toast-only on every width. The wide
 /// (>=768px) nav-level [MaterialBanner] is gone — validation errors
@@ -30,9 +38,28 @@ void showAppError(
   // they look mail-related, else to the generic line. Already-friendly
   // copy passes through untouched.
   final displayMessage = _sanitizedToastMessage(message);
-  final messenger = ScaffoldMessenger.of(context);
   final hasRetry = onRetry != null && isTransient;
   final hasAction = onAction != null && actionLabel != null;
+  // C164: zero SnackBar on web — overlay banner instead (same copy,
+  // same Retry gating, plum/cream tokens).
+  if (debugForceWebBanner ?? kIsWeb) {
+    _showWebBanner(
+      context,
+      message: displayMessage,
+      actionLabel: hasAction || hasRetry
+          ? (hasAction ? actionLabel : retryLabel)
+          : null,
+      onAction: hasAction || hasRetry
+          ? () {
+              _hideWebBanner();
+              (hasAction ? onAction : onRetry)?.call();
+            }
+          : null,
+      sticky: hasRetry || hasAction,
+    );
+    return;
+  }
+  final messenger = ScaffoldMessenger.of(context);
   messenger
     ..clearMaterialBanners()
     ..clearSnackBars()
@@ -78,11 +105,141 @@ void showAppError(
 }
 
 /// C52: clears any visible app error toast (plus legacy banners).
+/// C164: also clears the web overlay banner.
 void hideAppError(BuildContext context) {
+  _hideWebBanner();
   final messenger = ScaffoldMessenger.of(context);
   messenger
     ..clearSnackBars()
     ..clearMaterialBanners();
+}
+
+/// C164: success/info notices share the web overlay banner (no Retry
+/// gating) so the 5 `_snack` call sites render zero SnackBar on web.
+/// Mobile keeps the legacy SnackBar path untouched.
+void showAppNotice(BuildContext context, {required String message}) {
+  if (debugForceWebBanner ?? kIsWeb) {
+    _showWebBanner(context, message: message, sticky: false);
+    return;
+  }
+  ScaffoldMessenger.of(context)
+    ..clearSnackBars()
+    ..showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppTheme.primaryButtonBackground,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        duration: const Duration(seconds: 4),
+        content: ToastEntry(
+          child: Text(
+            message,
+            style: const TextStyle(color: AppTheme.onPrimaryButton),
+            softWrap: true,
+          ),
+        ),
+      ),
+    );
+}
+
+OverlayEntry? _webBannerEntry;
+int _webBannerGeneration = 0;
+Timer? _webBannerTimer;
+
+/// C164: top-center overlay banner — the web replacement for SnackBar.
+/// Plum/cream tokens, message + optional action + dismiss. `sticky`
+/// banners persist until dismissed; others auto-dismiss like a toast.
+void _showWebBanner(
+  BuildContext context, {
+  required String message,
+  String? actionLabel,
+  VoidCallback? onAction,
+  required bool sticky,
+}) {
+  _hideWebBanner();
+  final generation = ++_webBannerGeneration;
+  final entry = OverlayEntry(
+    builder: (overlayContext) => Positioned(
+      top: 16,
+      left: 16,
+      right: 16,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Material(
+            color: AppTheme.primaryButtonBackground,
+            borderRadius: BorderRadius.circular(12),
+            elevation: 6,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: Text(
+                      message,
+                      key: const Key('web_banner_message'),
+                      style: const TextStyle(
+                        color: AppTheme.onPrimaryButton,
+                      ),
+                      softWrap: true,
+                    ),
+                  ),
+                  if (actionLabel != null) ...[
+                    const SizedBox(width: 12),
+                    TextButton(
+                      key: const Key('web_banner_action'),
+                      onPressed: onAction,
+                      child: Text(
+                        actionLabel,
+                        style: const TextStyle(
+                          color: AppTheme.onPrimaryButton,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(width: 4),
+                  IconButton(
+                    key: const Key('web_banner_dismiss'),
+                    tooltip: 'Dismiss',
+                    iconSize: 18,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: _hideWebBanner,
+                    icon: const Icon(
+                      Icons.close,
+                      color: AppTheme.onPrimaryButton,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  _webBannerEntry = entry;
+  Overlay.of(context).insert(entry);
+  if (!sticky) {
+    _webBannerTimer = Timer(const Duration(seconds: 4), () {
+      if (generation == _webBannerGeneration) _hideWebBanner();
+    });
+  }
+}
+
+void _hideWebBanner() {
+  _webBannerTimer?.cancel();
+  _webBannerTimer = null;
+  _webBannerEntry?.remove();
+  _webBannerEntry = null;
+  _webBannerGeneration++;
 }
 
 /// C162: toast-level guard against raw server/exception blobs. Returns

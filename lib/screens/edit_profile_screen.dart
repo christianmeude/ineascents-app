@@ -162,9 +162,8 @@ class _EditProfileFormState extends ConsumerState<EditProfileForm> {
   }
 
   void _snack(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    // C164: overlay banner on web, legacy toast on mobile.
+    showAppNotice(context, message: message);
   }
 
   Future<void> _done(String message, User? user) async {

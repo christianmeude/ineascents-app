@@ -98,9 +98,8 @@ class _ForgotPasswordFormState extends ConsumerState<ForgotPasswordForm> {
   }
 
   void _snack(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    // C164: overlay banner on web, legacy toast on mobile.
+    showAppNotice(context, message: message);
   }
 
   /// C93: request a reset code (POST /api/forgot-password). The backend

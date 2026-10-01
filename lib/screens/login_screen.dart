@@ -125,6 +125,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         _InputLabel(text: 'Email', color: inputLabelColor),
                         const SizedBox(height: 4),
                         CustomTextField(
+                          key: const Key('login_email'),
                           controller: emailController,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
@@ -172,6 +173,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         const SizedBox(height: 4),
                         CustomTextField(
+                          key: const Key('login_password'),
                           controller: passwordController,
                           obscureText: obscurePassword,
                           autofillHints: const [AutofillHints.password],

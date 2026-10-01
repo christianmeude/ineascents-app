@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'bottom_nav_bar.dart';
 import 'processing_payment_overlay.dart';
+import 'tab_swipe_view.dart';
 import 'theme_toggle_button.dart';
 import 'top_nav_bar.dart';
 
@@ -130,6 +131,43 @@ class ResponsiveAppShell extends StatelessWidget {
     return MediaQuery.of(context).size.width >= mobileBreakpoint;
   }
 
+  /// C158: tab roots eligible for mobile swipe (nav order). Detail /
+  /// sub-routes (booking, bookings/:id, profile/*) are excluded.
+  static const List<String> tabSwipeRoots = [
+    '/home',
+    '/packages',
+    '/bookings',
+    '/calendar',
+    '/profile',
+  ];
+
+  /// C158: mobile-only swipe wrapper. Roots get [TabSwipeView]
+  /// (PageView -> goBranch); detail routes render the plain shell so the
+  /// booking wizard stays buttons-only. Desktop keeps indexedStack as-is.
+  Widget _mobileBody(BuildContext context, StatefulNavigationShell shell) {
+    String location = '';
+    try {
+      final router = GoRouter.maybeOf(context);
+      if (router != null) {
+        try {
+          location = router.routeInformationProvider.value.uri.path;
+        } catch (_) {
+          try {
+            location = router.location;
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
+    final path = location.split('?').first;
+    if (tabSwipeRoots.contains(path)) {
+      return TabSwipeView(
+        key: const ValueKey('tab_swipe_view'),
+        navigationShell: shell,
+      );
+    }
+    return shell;
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -137,6 +175,13 @@ class ResponsiveAppShell extends StatelessWidget {
         final width = constraints.maxWidth;
         final isDesktopView = width >= breakpoint;
 
+        final shell = navigationShell;
+        final Widget bodyContent;
+        if (shell != null && !isDesktopView) {
+          bodyContent = _mobileBody(context, shell);
+        } else {
+          bodyContent = shell ?? child;
+        }
         return Scaffold(
           // Null inherits the theme scaffold color; the fixed ambient
           // below paints the shared gradient over it full-bleed.
@@ -152,7 +197,7 @@ class ResponsiveAppShell extends StatelessWidget {
           // processing survives navigation (provider-level, never
           // route-local).
           body: ProcessingPaymentOverlayHost(
-            child: navigationShell ?? child,
+            child: bodyContent,
           ),
           bottomNavigationBar: isDesktopView
               ? null

@@ -31,5 +31,6 @@ export 'auth_background.dart';
 export 'gated_code_section.dart';
 export 'profile_sheet.dart';
 export 'processing_payment_overlay.dart';
+export 'tab_swipe_view.dart';
 export 'micro_interactions.dart';
 export 'success_check.dart';

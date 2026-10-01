@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ui' show FontFeature;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,6 +53,13 @@ class BookingScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<BookingScreen> createState() => _BookingScreenState();
 }
+
+/// C157 test hook: forces the web-instant stage path in widget tests
+/// where [kIsWeb] is always false on the VM. Null (default) uses the
+/// real `kIsWeb + width` gate; tests set true/false to simulate web
+/// vs mobile. Never set outside tests.
+@visibleForTesting
+bool? debugBookingStageWebInstant;
 
 class _BookingScreenState extends ConsumerState<BookingScreen> {
   bool _isInitialized = false;
@@ -149,13 +156,26 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   /// C65: shared stage transition — slide + fade on step change,
   /// direction-aware (cheap `_lastSeenStep` compare), ≤250ms ease-out,
   /// Flutter built-ins only. Instant child swap when reduced motion.
+  /// C157: web (≥768px) swaps stages instantly — no entrance animation;
+  /// mobile keeps slide + fade (reduced-motion swap intact).
   Widget _stageSwitcher({
     required int step,
     required Widget child,
   }) {
-    final reduce = _isReducedMotion(context);
     final forward = step >= _lastSeenStep;
     _lastSeenStep = step;
+    final webInstant =
+        debugBookingStageWebInstant ??
+        (kIsWeb &&
+            MediaQuery.sizeOf(context).width >=
+                ResponsiveAppShell.mobileBreakpoint);
+    if (webInstant) {
+      return KeyedSubtree(
+        key: ValueKey('booking_stage_$step'),
+        child: child,
+      );
+    }
+    final reduce = _isReducedMotion(context);
     final begin = forward
         ? const Offset(0.12, 0)
         : const Offset(-0.12, 0);

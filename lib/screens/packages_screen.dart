@@ -5,6 +5,43 @@ import '../providers/index.dart';
 import '../widgets/index.dart';
 import '../models/index.dart';
 
+/// C160: 5-minute in-memory catalog cache (screen-owned statics — never in
+/// providers). On success the screen refreshes it; on a transient
+/// (offline) error with a fresh cache the screen renders the cached list
+/// with [CatalogOfflineBanner] instead of the error card.
+const catalogCacheTtl = Duration(minutes: 5);
+
+List<Package>? _catalogCache;
+DateTime? _catalogCacheAt;
+
+/// Pure TTL check (testable): true when [cachedAt] is within [ttl] of [now].
+bool isCatalogCacheFresh(
+  DateTime? cachedAt, {
+  DateTime? now,
+  Duration ttl = catalogCacheTtl,
+}) {
+  if (cachedAt == null) return false;
+  return (now ?? DateTime.now()).difference(cachedAt) < ttl;
+}
+
+/// True when the screen holds a non-empty cache younger than the TTL.
+bool hasFreshCatalogCache({DateTime? now}) =>
+    _catalogCache != null &&
+    _catalogCache!.isNotEmpty &&
+    isCatalogCacheFresh(_catalogCacheAt, now: now);
+
+@visibleForTesting
+void debugSeedCatalogCache(List<Package> packages, DateTime at) {
+  _catalogCache = packages;
+  _catalogCacheAt = at;
+}
+
+@visibleForTesting
+void debugClearCatalogCache() {
+  _catalogCache = null;
+  _catalogCacheAt = null;
+}
+
 class PackagesScreen extends ConsumerStatefulWidget {
   /// Date carried from the calendar (`?date=`); forwarded with each card.
   final DateTime? initialDate;
@@ -24,11 +61,6 @@ class _PackagesScreenState extends ConsumerState<PackagesScreen> {
   Widget build(BuildContext context) {
     final packagesAsync = ref.watch(packagesProvider);
 
-    // ============================================================
-    // COLORS (P7: flat theme background + dark-aware text)
-    // ============================================================
-
-    final textColor = CardSurfaces.title(context);
     final isInitialLoading = packagesAsync.isLoading && !packagesAsync.hasValue;
 
     // P7: no explicit color — the theme scaffold color (light cream /
@@ -99,84 +131,16 @@ class _PackagesScreenState extends ConsumerState<PackagesScreen> {
                               return _EmptyPackages();
                             }
 
-                            final offering = packages.first;
-                            final opts = offering.options;
-                            final choices = opts.isEmpty
-                                ? [
-                                    PackageOption(
-                                      offering.paxOptions?.firstOrNull ?? 50,
-                                      offering.priceForPax(null),
-                                    ),
-                                  ]
-                                : opts;
-
-                            return LayoutBuilder(
-                              builder: (context, constraints) {
-                                // C21: compact hero (200 mobile / 240 desktop)
-                                // + full Pax Choice list below. Desktop fills
-                                // the 1200 cap with a 2-column grid; mobile
-                                // stays single-column (360px safe).
-                                final wide = constraints.maxWidth >= 768;
-                                final rows = <Widget>[
-                                  for (final choice in choices) ...[
-                                    PaxChoiceRow(
-                                      packageId: offering.id,
-                                      pax: choice.pax,
-                                      price: choice.price,
-                                      initialDate: widget.initialDate,
-                                    ),
-                                  ],
-                                ];
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    PackageOfferingHero(package: offering),
-                                    const SizedBox(height: 20),
-                                    Text(
-                                      'Choose your Pax Choice',
-                                      // C113: theme ramp (explicit Figtree).
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
-                                            color: textColor,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    if (!wide) ...[
-                                      for (int i = 0; i < rows.length; i++) ...[
-                                        rows[i],
-                                        if (i < rows.length - 1)
-                                          const SizedBox(height: 10),
-                                      ],
-                                    ] else
-                                      GridView.builder(
-                                        shrinkWrap: true,
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
-                                        gridDelegate:
-                                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                              crossAxisCount: 2,
-                                              crossAxisSpacing: 12,
-                                              mainAxisSpacing: 12,
-                                              // Roomy rows: ~76px tall at 1200 cap.
-                                              mainAxisExtent: 78,
-                                            ),
-                                        itemCount: rows.length,
-                                        itemBuilder: (context, i) => rows[i],
-                                      ),
-                                  ],
-                                );
-                              },
+                            // C160: refresh the screen-owned cache on success.
+                            _catalogCache = packages;
+                            _catalogCacheAt = DateTime.now();
+                            return _PackagesScreenState.catalogContent(
+                              context,
+                              packages,
+                              offline: false,
+                              initialDate: widget.initialDate,
                             );
                           },
-
-                          // ==================================================
-                          // LOADING (C66: empty — skeleton lives in the
-                          // crossfade wrapper below so the swap animates)
-                          // ==================================================
                           loading: () {
                             return const SizedBox.shrink();
                           },
@@ -186,7 +150,18 @@ class _PackagesScreenState extends ConsumerState<PackagesScreen> {
                           // ==================================================
                           // P6 (Q6/Q8): shared friendly card; raw errors
                           // stay in logs, never on screen.
+                          // C160: transient (offline) error + fresh cache →
+                          // render the cached list with the offline banner.
                           error: (error, stack) {
+                            if (isTransientErrorMessage(error.toString()) &&
+                                hasFreshCatalogCache()) {
+                              return _PackagesScreenState.catalogContent(
+                                context,
+                                _catalogCache!,
+                                offline: true,
+                                initialDate: widget.initialDate,
+                              );
+                            }
                             return ErrorStateCard(
                               title: 'Unable to load Offerings',
                               message:
@@ -216,6 +191,87 @@ class _PackagesScreenState extends ConsumerState<PackagesScreen> {
       // ============================================================
       // BODY WRAPPER END
       // ============================================================
+    );
+  }
+
+  /// C160: shared Offering hero + Pax Choice rows for live and cached data.
+  /// [offline] prepends the cached-packages banner.
+  static Widget catalogContent(
+    BuildContext context,
+    List<Package> packages, {
+    required bool offline,
+    DateTime? initialDate,
+  }) {
+    final offering = packages.first;
+    final opts = offering.options;
+    final choices = opts.isEmpty
+        ? [
+            PackageOption(
+              offering.paxOptions?.firstOrNull ?? 50,
+              offering.priceForPax(null),
+            ),
+          ]
+        : opts;
+
+    final textColor = CardSurfaces.title(context);
+    final rows = <Widget>[
+      for (final choice in choices) ...[
+        PaxChoiceRow(
+          packageId: offering.id,
+          pax: choice.pax,
+          price: choice.price,
+          initialDate: initialDate,
+        ),
+      ],
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // C21: compact hero (200 mobile / 240 desktop) + full Pax Choice
+        // list below. Desktop fills the 1200 cap with a 2-column grid;
+        // mobile stays single-column (360px safe).
+        final wide = constraints.maxWidth >= 768;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (offline) ...[
+              const CatalogOfflineBanner(),
+              const SizedBox(height: 12),
+            ],
+            PackageOfferingHero(package: offering),
+            const SizedBox(height: 20),
+            Text(
+              'Choose your Pax Choice',
+              // C113: theme ramp (explicit Figtree).
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: textColor,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (!wide) ...[
+              for (int i = 0; i < rows.length; i++) ...[
+                rows[i],
+                if (i < rows.length - 1) const SizedBox(height: 10),
+              ],
+            ] else
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  // Roomy rows: ~76px tall at 1200 cap.
+                  mainAxisExtent: 78,
+                ),
+                itemCount: rows.length,
+                itemBuilder: (context, i) => rows[i],
+              ),
+          ],
+        );
+      },
     );
   }
 }

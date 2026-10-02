@@ -72,6 +72,10 @@ Future<void> _pumpDetail(
   await tester.pumpAndSettle();
 }
 
+String _counterText(WidgetTester tester) {
+  return tester.widget<Text>(find.byKey(const Key('scent_counter'))).data!;
+}
+
 double _gridExtent(WidgetTester tester, String category) {
   final grid = tester.widget<GridView>(
     find.byKey(Key('scent_grid_$category')),
@@ -99,8 +103,19 @@ void main() {
       await _pumpDetail(tester, container, router, const Size(1280, 800));
 
       expect(find.text('Package Details'), findsOneWidget);
+      final viewRect = Offset.zero & const Size(1280, 800);
       for (var id = 1; id <= 8; id++) {
-        expect(find.byKey(Key('scent_tile_$id')), findsOneWidget);
+        final tile = find.byKey(Key('scent_tile_$id'));
+        await tester.ensureVisible(tile);
+        await tester.pumpAndSettle();
+        expect(tile.hitTestable(), findsOneWidget);
+        final tileRect = tester.getRect(tile);
+        expect(
+          viewRect.contains(tileRect.topLeft) &&
+              viewRect.contains(tileRect.bottomRight),
+          isTrue,
+          reason: 'scent_tile_$id fully within viewport',
+        );
       }
       expect(_gridExtent(tester, 'Women'), 124);
       expect(_gridExtent(tester, 'Men'), 124);
@@ -119,8 +134,32 @@ void main() {
       await _pumpDetail(tester, container, router, const Size(390, 844));
 
       expect(find.text('Package Details'), findsOneWidget);
+      expect(_counterText(tester), '0/4');
       expect(_gridExtent(tester, 'Women'), 168);
       expect(_gridExtent(tester, 'Men'), 168);
+      // Toggle 4 tiles on → counter hits the cap.
+      for (var id = 1; id <= 4; id++) {
+        final tile = find.byKey(Key('scent_tile_$id'));
+        await tester.ensureVisible(tile);
+        await tester.pumpAndSettle();
+        await tester.tap(tile);
+        await tester.pump();
+      }
+      expect(_counterText(tester), '4/4');
+      // 5th tap is over the cap → ignored, counter unchanged.
+      final overCap = find.byKey(const Key('scent_tile_5'));
+      await tester.ensureVisible(overCap);
+      await tester.pumpAndSettle();
+      await tester.tap(overCap);
+      await tester.pump();
+      expect(_counterText(tester), '4/4');
+      // Toggle tile 1 off → counter drops, deselect always allowed.
+      final first = find.byKey(const Key('scent_tile_1'));
+      await tester.ensureVisible(first);
+      await tester.pumpAndSettle();
+      await tester.tap(first);
+      await tester.pump();
+      expect(_counterText(tester), '3/4');
       expect(tester.takeException(), isNull);
     });
   });

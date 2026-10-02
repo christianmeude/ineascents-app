@@ -658,8 +658,10 @@ class _BookingCard extends ConsumerWidget {
     final status = live.status.toString();
     final statusColor = _getStatusColor(status);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 24),
+    return GestureDetector(
+      onTap: () => context.push('/bookings/${booking.id}'),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 24),
 
       decoration: BoxDecoration(
         color: CardSurfaces.cardBg(context),
@@ -859,6 +861,7 @@ class _BookingCard extends ConsumerWidget {
             _RateExperienceButton(booking: live),
           ],
         ),
+      ),
       ),
     );
   }

@@ -5,6 +5,8 @@ import '../config/theme.dart';
 import '../providers/index.dart';
 import '../models/index.dart';
 import '../utils/peso.dart';
+import '../utils/feedback_api.dart';
+import '../utils/feedback_store.dart';
 import '../widgets/index.dart';
 
 // C78: sort keys for the bookings list (below header).
@@ -32,6 +34,12 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
   String _statusFilter = 'All';
   String _query = '';
   final TextEditingController _searchController = TextEditingController();
+
+  // C146: client-detected completion + once-per-booking feedback popup.
+  // Both are guarded per Booking id so rebuilds never re-fire them.
+  final Set<int> _completeAttempted = <int>{};
+  final Set<int> _promptedIds = <int>{};
+  bool _handlingPostLoad = false;
 
   @override
   void dispose() {
@@ -181,6 +189,66 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
     return list;
   }
 
+  /// C146: runs once per loaded list — fires client-detected completion for
+  /// past Confirmed Bookings, then shows the once-per-booking feedback popup
+  /// for the first eligible Completed Booking. All network failures are
+  /// swallowed (backend A37 may not be live; offline must stay graceful).
+  Future<void> _handlePostLoad(List<Booking> bookings) async {
+    if (_handlingPostLoad || !mounted) return;
+    _handlingPostLoad = true;
+    try {
+      for (final booking in bookings) {
+        final id = booking.id;
+        if (id == null ||
+            _completeAttempted.contains(id) ||
+            !isConfirmedStatus(booking.status) ||
+            !isEventPast(booking.eventDate)) {
+          continue;
+        }
+        _completeAttempted.add(id);
+        try {
+          await ref.read(feedbackApiProvider).completeBooking(id);
+          ref.invalidate(bookingsProvider);
+        } catch (_) {
+          // Graceful offline: retry next load; popup logic below still runs
+          // off the cached Status.
+        }
+      }
+
+      final submitted = await FeedbackStore.submittedIds();
+      if (!mounted) return;
+      final seen = await FeedbackStore.seenIds();
+      if (!mounted) return;
+      Booking? candidate;
+      for (final booking in bookings) {
+        final id = booking.id;
+        if (id == null ||
+            _promptedIds.contains(id) ||
+            submitted.contains(id) ||
+            seen.contains(id) ||
+            !isCompletedStatus(booking.status) ||
+            !isEventPast(booking.eventDate)) {
+          continue;
+        }
+        candidate = booking;
+        break;
+      }
+      final target = candidate;
+      if (target == null || target.id == null) return;
+      _promptedIds.add(target.id!);
+      if (!mounted) return;
+      await showFeedbackDialog(context, target.id);
+      if (!mounted) return;
+      // Dismiss (`Not now`, back, tap-outside) never nags again for this
+      // popup instance; submit already persisted via the dialog.
+      await FeedbackStore.markSeen(target.id!);
+      ref.read(feedbackRefreshProvider.notifier).state++;
+      if (mounted) setState(() {});
+    } finally {
+      _handlingPostLoad = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bookingsAsync = ref.watch(bookingsProvider);
@@ -197,6 +265,11 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
       body: SafeArea(
         child: bookingsAsync.when(
           data: (bookings) {
+            // C146: post-load side effects (completion + feedback popup)
+            // run once per frame, guarded per Booking id inside.
+            WidgetsBinding.instance.addPostFrameCallback(
+              (_) => _handlePostLoad(bookings),
+            );
             final visible = _visible(bookings);
             final statuses = <String>['All'];
             for (final b in bookings) {
@@ -780,9 +853,60 @@ class _BookingCard extends ConsumerWidget {
                 ],
               ),
             ),
+
+            // C146: persistent `Rate experience` action for Completed
+            // Bookings without submitted feedback (opens the same form).
+            _RateExperienceButton(booking: live),
           ],
         ),
       ),
+    );
+  }
+}
+
+// ============================================================================
+// RATE EXPERIENCE ACTION (C146)
+// ============================================================================
+
+/// Persistent `Rate experience` action for Completed Bookings without
+/// submitted feedback. Hidden for any other Status, for future-dated events,
+/// and once feedback is submitted.
+class _RateExperienceButton extends ConsumerWidget {
+  final Booking booking;
+
+  const _RateExperienceButton({required this.booking});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Rebuild when feedback state changes (submit / dismiss anywhere).
+    ref.watch(feedbackRefreshProvider);
+    if (!isCompletedStatus(booking.status) ||
+        !isEventPast(booking.eventDate) ||
+        booking.id == null) {
+      return const SizedBox.shrink();
+    }
+    return FutureBuilder<Set<int>>(
+      future: FeedbackStore.submittedIds(),
+      builder: (context, snapshot) {
+        if (snapshot.data?.contains(booking.id) ?? false) {
+          return const SizedBox.shrink();
+        }
+        return Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              key: Key('rate_experience_${booking.id}'),
+              icon: const Icon(Icons.star_outline, size: 18),
+              label: const Text('Rate experience'),
+              onPressed: () async {
+                await showFeedbackDialog(context, booking.id);
+                ref.read(feedbackRefreshProvider.notifier).state++;
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -1020,6 +1144,7 @@ class _EmptyBookings extends StatelessWidget {
 // (success/pending/errorOnLight/secondary) — never bespoke hex.
 Color _getStatusColor(String status) {
   switch (status.toLowerCase()) {
+    case 'completed':
     case 'confirmed':
     case 'paid':
       return AppTheme.success;

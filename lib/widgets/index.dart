@@ -35,3 +35,4 @@ export 'processing_payment_overlay.dart';
 export 'tab_swipe_view.dart';
 export 'micro_interactions.dart';
 export 'success_check.dart';
+export 'feedback_dialog.dart';

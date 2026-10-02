@@ -1280,15 +1280,15 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                         ),
                       ),
                     ),
+                    if (ref.read(bookingFlowProvider).selectedScentIds.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      _buildScheduleScentsReadonly(package),
+                    ],
                   ],
                 ),
               ),
             ],
           ),
-          if (ref.read(bookingFlowProvider).selectedScentIds.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            _buildScheduleScentsReadonly(package),
-          ],
           // C169: empty selection renders nothing here (C144 fixed
           // Schedule geometry); the rail carries the Scent hint and the
           // proceed gate explains the requirement inline.

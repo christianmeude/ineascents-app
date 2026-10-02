@@ -244,12 +244,32 @@ class SelectedScentsChips extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final id in selectedIds)
-                Chip(
+              ...selectedIds.map((id) {
+                final choice = byId[id];
+                if (choice == null) return const SizedBox.shrink();
+                return Chip(
                   key: Key('selected_scent_chip_$id'),
-                  label: Text(byId[id]?.name ?? 'Scent $id'),
+                  avatar: choice.asset != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.asset(
+                            choice.asset!,
+                            fit: BoxFit.cover,
+                            width: 24,
+                            height: 24,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.spa_outlined, size: 16),
+                          ),
+                        )
+                      : const Icon(Icons.spa_outlined, size: 16),
+                  label: Text(
+                    choice.name,
+                    style: const TextStyle(fontSize: 12),
+                  ),
                   visualDensity: VisualDensity.compact,
-                ),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                );
+              }),
             ],
           ),
         ],

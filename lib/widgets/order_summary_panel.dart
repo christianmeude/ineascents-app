@@ -246,7 +246,19 @@ class OrderSummaryPanel extends StatelessWidget {
             valueKey: const Key('summary_value_time'),
           ),
           _rowDivider(context),
-
+          if (selectedScentIds.isNotEmpty) ...[
+            _summaryRow(
+              context,
+              label: 'Scents',
+              value: selectedScentIds.map((id) {
+                final matches = package.scents?.where((s) => s.id == id);
+                return (matches != null && matches.isNotEmpty) ? matches.first.name : 'Scent $id';
+              }).join(', '),
+              valueKey: const Key('summary_value_scents'),
+            ),
+            _rowDivider(context),
+          ],
+          
           // Collapsed inclusions signal (full list lives in Details).
           Text(
             inclusionsCaption,

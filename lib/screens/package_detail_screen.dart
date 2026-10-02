@@ -65,6 +65,14 @@ class _PackageDetailScreenState extends ConsumerState<PackageDetailScreen> {
     });
   }
 
+  void _goBack(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/packages');
+    }
+  }
+
   void _book(BuildContext context, int pax) {
     final notifier = ref.read(bookingFlowProvider.notifier);
     notifier.setSelectedPax(pax);
@@ -146,6 +154,17 @@ class _PackageDetailScreenState extends ConsumerState<PackageDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // C167: router-aware back to the packages list.
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            key: const Key('detail_back'),
+            onPressed: () => _goBack(context),
+            icon: const Icon(Icons.arrow_back_rounded, size: 18),
+            label: const Text('Back to Packages'),
+          ),
+        ),
+        const SizedBox(height: 8),
         // Pax Choice header.
         Container(
           key: const Key('detail_pax_header'),

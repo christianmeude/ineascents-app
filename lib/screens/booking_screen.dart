@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/index.dart';
 import '../providers/index.dart';
+import '../config/scents.dart';
 import '../config/theme.dart';
 import '../src/utils/checkout_window.dart';
 import '../utils/peso.dart';
@@ -782,7 +783,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                                   // C92: one "Select Date & Time" card —
                                   // calendar (inner col 1) + time (inner
                                   // col 2); the rail (col 3) owns booking.
-                                  _buildScheduleDateTimeCard(),
+                                  _buildScheduleDateTimeCard(package),
                                 ],
                               ),
                       ),
@@ -936,6 +937,14 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                                           .setSelectedTime(time);
                                     },
                                   ),
+                                  // C144: read-only Scent recap (no editing).
+                                  if (ref
+                                      .read(bookingFlowProvider)
+                                      .selectedScentIds
+                                      .isNotEmpty) ...[
+                                    const SizedBox(height: 14),
+                                    _buildScheduleScentsReadonly(package),
+                                  ],
                                 ],
                               ),
                       ),
@@ -1084,11 +1093,24 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   // C92 SCHEDULE: single "Select Date & Time" card (desktop)
   // ==========================================================================
 
+  /// C144: Schedule-stage read-only Scent recap — chips only, never a
+  /// toggle (shelf editing lives on the Pax Choice detail). Empty
+  /// selection renders nothing so the desktop fixed Schedule geometry
+  /// is unchanged.
+  Widget _buildScheduleScentsReadonly(Package package) {
+    final ids = ref.read(bookingFlowProvider).selectedScentIds;
+    if (ids.isEmpty) return const SizedBox.shrink();
+    return SelectedScentsChips(
+      choices: resolveScentChoices(package.scents),
+      selectedIds: ids,
+    );
+  }
+
   /// C92: one card holding the calendar (inner col 1) + the event-time
   /// picker (inner col 2). No Pax UI, no event recap — the `Your Booking`
   /// rail (col 3) owns that line. Desktop-only; tablet keeps its stacked
   /// calendar + details panel, mobile keeps its own step flow.
-  Widget _buildScheduleDateTimeCard() {
+  Widget _buildScheduleDateTimeCard(Package package) {
     return Container(
       key: const Key('schedule_datetime_card'),
       width: double.infinity,
@@ -1198,6 +1220,10 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               ),
             ],
           ),
+          if (ref.read(bookingFlowProvider).selectedScentIds.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _buildScheduleScentsReadonly(package),
+          ],
         ],
       ),
     );
@@ -2016,6 +2042,11 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           ),
           const SizedBox(height: 16),
           _buildMobileScheduleCollapsedSummary(package, paxEntries),
+          // C144: read-only Scent recap (no editing in Schedule).
+          if (ref.read(bookingFlowProvider).selectedScentIds.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _buildScheduleScentsReadonly(package),
+          ],
         ],
       );
     } else if (_currentStep == 3) {

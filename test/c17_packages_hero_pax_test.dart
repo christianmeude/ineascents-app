@@ -10,7 +10,7 @@ import 'package:inea_scents_client/screens/packages_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// C17: Packages shows one Offering hero + 4 Pax Choice rows; tapping a
-/// row pushes the existing `/booking/:id?pax=&date=` route prefilled.
+/// row pushes the C144 Pax Choice detail (`/packages/:id?pax=&date=`).
 Package _offering() => const Package(
   id: 1,
   name: 'Essential 10ml Perfume Bar',
@@ -37,14 +37,14 @@ void main() {
               PackagesScreen(initialDate: initialDate),
         ),
         GoRoute(
-          path: '/booking/:id',
+          path: '/packages/:id',
           builder: (context, state) {
             seen.write(
               "id=${state.pathParameters['id']}"
               "&pax=${state.queryParameters['pax']}"
               "&date=${state.queryParameters['date']}",
             );
-            return const Text('Booking Screen Page');
+            return const Text('Pax Choice Detail Page');
           },
         ),
       ],
@@ -91,7 +91,7 @@ void main() {
     }
   });
 
-  testWidgets('tap Pax row pushes /booking/:id with pax prefilled', (
+  testWidgets('tap Pax row pushes /packages/:id with pax prefilled', (
     WidgetTester tester,
   ) async {
     final seen = StringBuffer();
@@ -103,7 +103,7 @@ void main() {
     await tester.tap(find.text('70 Pax Choice'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Booking Screen Page'), findsOneWidget);
+    expect(find.text('Pax Choice Detail Page'), findsOneWidget);
     expect(seen.toString(), 'id=1&pax=70&date=2026-10-03');
   });
 }

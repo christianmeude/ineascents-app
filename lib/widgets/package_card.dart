@@ -255,7 +255,7 @@ class _PackageCardState extends State<PackageCard> {
 /// C21: compact Offering banner — 180-220px mobile, capped desktop.
 /// Row layout: image thumb + Offering name, starting price,
 /// inclusions/freebies teaser. Static; the Pax Choice rows below drive
-/// booking via `/booking/:id?pax=&date=`.
+/// the detail picker via `/packages/:id?pax=&date=`.
 class PackageOfferingHero extends StatelessWidget {
   final Package package;
 
@@ -386,8 +386,9 @@ class PackageOfferingHero extends StatelessWidget {
   }
 }
 
-/// C17: one Pax Choice selector row — pax + price. Tap pushes the
-/// existing `/booking/:id?pax=&date=` route with pax prefilled.
+/// C17: one Pax Choice selector row — pax + price. Tap pushes the C144
+/// Pax Choice detail (`/packages/:id?pax=&date=`), the pre-booking picker
+/// carrying the headcount and the Scent shelf.
 class PaxChoiceRow extends StatelessWidget {
   final int? packageId;
   final int pax;
@@ -409,7 +410,7 @@ class PaxChoiceRow extends StatelessWidget {
       'pax=$pax',
       if (initialDate != null) 'date=${formatDateParam(initialDate!)}',
     ];
-    context.push('/booking/$packageId?${query.join('&')}');
+    context.push('/packages/$packageId?${query.join('&')}');
   }
 
   @override

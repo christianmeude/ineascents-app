@@ -4,6 +4,7 @@ export 'login_screen.dart';
 export 'register_screen.dart';
 export 'home_screen.dart';
 export 'packages_screen.dart';
+export 'package_detail_screen.dart';
 export 'booking_screen.dart';
 export 'calendar_screen.dart';
 export 'my_bookings_screen.dart';

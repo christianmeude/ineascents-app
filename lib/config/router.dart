@@ -165,6 +165,28 @@ class AppRouter {
                   );
                 },
               ),
+              // C144: Pax Choice detail — pre-booking picker reached from
+              // the packages Pax Choice rows (`/packages/:id?pax=&date=`).
+              GoRoute(
+                path: '/packages/:id',
+                builder: (context, state) {
+                  final packageId = int.parse(state.pathParameters['id']!);
+                  final initialPax = int.tryParse(
+                    state.queryParameters['pax'] ?? '',
+                  );
+                  final initialDate = tryParseDateParam(
+                    state.queryParameters['date'],
+                  );
+                  return _titled(
+                    'Pax Choice – Inea Scents',
+                    PackageDetailScreen(
+                      packageId: packageId,
+                      initialPax: initialPax,
+                      initialDate: initialDate,
+                    ),
+                  );
+                },
+              ),
             ],
           ),
           StatefulShellBranch(

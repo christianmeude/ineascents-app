@@ -456,6 +456,8 @@ class BookingFlowNotifier extends StateNotifier<BookingFlowState> {
     if (scents.contains(scentId)) {
       scents.remove(scentId);
     } else {
+      // C144: shelf cap — at most 4 scents per booking; extra taps ignored.
+      if (scents.length >= 4) return;
       scents.add(scentId);
     }
     state = state.copyWith(selectedScentIds: scents);

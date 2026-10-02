@@ -165,6 +165,15 @@ class _PackageDetailScreenState extends ConsumerState<PackageDetailScreen> {
           ),
         ),
         const SizedBox(height: 8),
+        // C166: parent header above the cards.
+        Text(
+          'Package Details',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: titleColor,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 12),
         // Pax Choice header.
         Container(
           key: const Key('detail_pax_header'),

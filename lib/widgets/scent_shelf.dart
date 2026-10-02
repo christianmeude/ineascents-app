@@ -81,7 +81,9 @@ class ScentShelf extends StatelessWidget {
                     crossAxisCount: crossAxisCount,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    mainAxisExtent: 168,
+                    // C166: compact tiles on web/wide so all 8 scents fit
+                    // at a glance; mobile keeps the established 168.
+                    mainAxisExtent: wide ? 124 : 168,
                   ),
                   itemCount: items.length,
                   itemBuilder: (context, i) {

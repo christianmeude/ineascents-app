@@ -34,8 +34,9 @@ flutter pub get
 # 2. Regenerate models/API clients (freezed + json_serializable + retrofit)
 dart run build_runner build --delete-conflicting-outputs
 
-# 3. Run against local backend (web)
-flutter run -d chrome --dart-define=API_URL=http://127.0.0.1:8080
+# 3. Run against local backend (web, pinned port — the landing
+# "Book in App" link targets this port, so keep it fixed)
+flutter run -d chrome --web-port=62409 --dart-define=API_URL=http://127.0.0.1:8080
 
 # Run against local backend (Android emulator)
 flutter run --dart-define=API_URL=http://10.0.2.2:8080

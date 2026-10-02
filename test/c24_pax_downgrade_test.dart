@@ -42,6 +42,10 @@ void main() {
       );
       addTearDown(container.dispose);
 
+      // C169: Scent is required to proceed — seed one (as the Package
+      // detail shelf would) so the flow can advance past Schedule.
+      container.read(bookingFlowProvider.notifier).toggleScent(1);
+
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,

@@ -109,6 +109,9 @@ void main() {
 
       final target = DateTime(2030, 6, 15);
       container.read(bookingFlowProvider.notifier).setSelectedDate(target);
+      // C169: Scent is required to proceed — seed one (as the Package
+      // detail shelf would) so the flow can advance past Schedule.
+      container.read(bookingFlowProvider.notifier).toggleScent(1);
       await tester.pumpAndSettle();
 
       // C74: Schedule → Details → Payment (no direct jump).

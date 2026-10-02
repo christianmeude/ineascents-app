@@ -356,6 +356,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         }
         return;
       }
+      // C169: Scent is required — a Booking is never submitted without
+      // at least 1 chosen Scent.
+      if (!_checkScentRequired()) return;
       final notifier = ref.read(bookingFlowProvider.notifier);
       // Web popup rule: window.open only survives inside the tap gesture.
       // The booking POST resolves seconds later, so hold a branded
@@ -515,6 +518,37 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     if (state.paymentMethod == null) {
       notifier.setPaymentMethod('online');
     }
+  }
+
+  /// C169: Scent-required gate — a Booking cannot proceed without at
+  /// least 1 chosen Scent (chosen on the Package detail shelf; the flow
+  /// itself is read-only). Returns true when the flow may advance;
+  /// otherwise renders the inline gate message and returns false.
+  /// Step order is unchanged — this only blocks forward movement.
+  bool _checkScentRequired() {
+    if (ref.read(bookingFlowProvider).selectedScentIds.isNotEmpty) {
+      return true;
+    }
+    // C52: validation gate renders inline, never toast.
+    _setFormError('Choose at least 1 Scent to continue your Booking.');
+    return false;
+  }
+
+  /// C169: Scent-required hint for the Schedule stage — the shelf lives
+  /// on the Package detail, so an empty selection explains where to
+  /// choose. Renders nothing once chosen (the chips recap takes over).
+  Widget _buildScentRequiredHint() {
+    if (ref.read(bookingFlowProvider).selectedScentIds.isNotEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Text(
+        'Choose at least 1 Scent on the Package detail to continue your Booking.',
+        key: const Key('scent_required_hint'),
+        style: TextStyle(fontSize: 12, color: _body),
+      ),
+    );
   }
 
   void _goToStep(int step) {
@@ -809,6 +843,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                     selectedDate: _selectedDate,
                     selectedTime: _selectedTime,
                     selectedPax: _selectedPax,
+                    selectedScentIds: ref
+                        .read(bookingFlowProvider)
+                        .selectedScentIds,
                     paymentMethod: _paymentMethod,
                     actionButtonText: isPayment
                         ? 'Confirm & Pay'
@@ -827,6 +864,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                           _setFormError('Please fill name, email and venue');
                           return;
                         }
+                        // C169: Scent is required to proceed.
+                        if (!_checkScentRequired()) return;
                         _goToStep(4);
                       } else {
                         // Selections live in the notifier; the gate below is
@@ -837,6 +876,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                           _setFormError('Please select date and time');
                           return;
                         }
+                        // C169: Scent is required to proceed.
+                        if (!_checkScentRequired()) return;
                         _goToStep(3);
                       }
                     },
@@ -912,6 +953,15 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                                   // C92: Pax header + event recap retired
                                   // (rail owns booking); calendar + time
                                   // only, page scroll retained on tablet.
+                                  // C169: schedule helper (mirrors mobile).
+                                  Text(
+                                    'Pick an open date and Time Slot for your Booking.',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: _body,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
                                   ReservationCalendarPanel(
                                     key: const Key('tablet_calendar_panel'),
                                     selectedDate: _selectedDate,
@@ -938,6 +988,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                                     },
                                   ),
                                   // C144: read-only Scent recap (no editing).
+                                  // C169: empty selection renders nothing
+                                  // here; the rail carries the Scent hint.
                                   if (ref
                                       .read(bookingFlowProvider)
                                       .selectedScentIds
@@ -968,6 +1020,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                     selectedDate: _selectedDate,
                     selectedTime: _selectedTime,
                     selectedPax: _selectedPax,
+                    selectedScentIds: ref
+                        .read(bookingFlowProvider)
+                        .selectedScentIds,
                     paymentMethod: _paymentMethod,
                     actionButtonText: isPayment
                         ? 'Confirm & Pay'
@@ -986,6 +1041,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                           _setFormError('Please fill name, email and venue');
                           return;
                         }
+                        // C169: Scent is required to proceed.
+                        if (!_checkScentRequired()) return;
                         _goToStep(4);
                       } else {
                         // Selections live in the notifier; the gate below is
@@ -996,6 +1053,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                           _setFormError('Please select date and time');
                           return;
                         }
+                        // C169: Scent is required to proceed.
+                        if (!_checkScentRequired()) return;
                         _goToStep(3);
                       }
                     },
@@ -1043,6 +1102,12 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               fontWeight: FontWeight.w600,
               color: _title,
             ),
+          ),
+          const SizedBox(height: 4),
+          // C169: details helper for the web form column.
+          Text(
+            'Share your contact details for this Booking.',
+            style: TextStyle(fontSize: 12, color: _body),
           ),
           const SizedBox(height: 15),
           _buildMobileContactField(
@@ -1224,6 +1289,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             const SizedBox(height: 12),
             _buildScheduleScentsReadonly(package),
           ],
+          // C169: empty selection renders nothing here (C144 fixed
+          // Schedule geometry); the rail carries the Scent hint and the
+          // proceed gate explains the requirement inline.
         ],
       ),
     );
@@ -1433,6 +1501,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         _setFormError('Please select date and time');
         return;
       }
+      // C169: Scent is required to proceed.
+      if (!_checkScentRequired()) return;
       notifier.nextStep();
     } else if (_currentStep == 3) {
       if (!notifier.canProceedFromDetails()) {
@@ -1440,6 +1510,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         _setFormError('Please fill name, email and venue');
         return;
       }
+      // C169: Scent is required to proceed.
+      if (!_checkScentRequired()) return;
       notifier.nextStep();
     } else {
       notifier.nextStep();
@@ -1949,10 +2021,17 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         children: [
           // C92: no Pax header in Schedule (headcount came via `?pax=`;
           // the collapsed summary below carries the PAX one-liner).
+          // C169: sharpened step label + schedule helper (date, Time
+          // Slot, and the Scent requirement).
           Text(
-            'Please Choose Available Schedule',
+            'Choose Your Schedule',
             // C36: title token (was plum, fails 7:1 on tinted fills).
             style: TextStyle(fontSize: 13, color: _title),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Pick an open date and Time Slot for your Booking.',
+            style: TextStyle(fontSize: 12, color: _body),
           ),
           const SizedBox(height: 15),
           IneaCalendar(
@@ -2043,9 +2122,12 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           const SizedBox(height: 16),
           _buildMobileScheduleCollapsedSummary(package, paxEntries),
           // C144: read-only Scent recap (no editing in Schedule).
+          // C169: an empty selection explains the Scent requirement.
           if (ref.read(bookingFlowProvider).selectedScentIds.isNotEmpty) ...[
             const SizedBox(height: 12),
             _buildScheduleScentsReadonly(package),
+          ] else ...[
+            _buildScentRequiredHint(),
           ],
         ],
       );
@@ -2061,6 +2143,12 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               fontWeight: FontWeight.w600,
               color: _title,
             ),
+          ),
+          const SizedBox(height: 4),
+          // C169: details helper — what to confirm before Checkout.
+          Text(
+            'Confirm your Package, Time Slot and Pax below, then share your contact details.',
+            style: TextStyle(fontSize: 12, color: _body),
           ),
           const SizedBox(height: 15),
           // C27: single column under 768px; desktop row untouched.
@@ -2244,6 +2332,12 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               fontWeight: FontWeight.w600,
               color: _title,
             ),
+          ),
+          const SizedBox(height: 4),
+          // C169: payment helper — what to review before Checkout.
+          Text(
+            'Review your Booking below, then choose a Payment Method for Checkout.',
+            style: TextStyle(fontSize: 12, color: _body),
           ),
           const SizedBox(height: 15),
           Container(

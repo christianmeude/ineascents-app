@@ -31,6 +31,11 @@ class OrderSummaryPanel extends StatelessWidget {
   final DateTime? selectedDate;
   final String? selectedTime;
   final int? selectedPax;
+
+  /// C169: chosen Scent ids — an empty selection renders the
+  /// Scent-required hint above the CTA (Scents are chosen on the
+  /// Package detail; at least 1 is required to proceed).
+  final List<int> selectedScentIds;
   final String? paymentMethod;
   final VoidCallback? onProceed;
   final String actionButtonText;
@@ -43,6 +48,7 @@ class OrderSummaryPanel extends StatelessWidget {
     this.selectedDate,
     this.selectedTime,
     this.selectedPax,
+    this.selectedScentIds = const [],
     this.paymentMethod,
     this.onProceed,
     this.actionButtonText = 'Confirm & Pay',
@@ -288,6 +294,24 @@ class OrderSummaryPanel extends StatelessWidget {
           ),
 
           const SizedBox(height: 14),
+
+          // C169: Scent-required hint at the decision point (renders only
+          // when empty; the sticky rail scrolls internally, so the fixed
+          // desktop Schedule geometry is unaffected).
+          if (selectedScentIds.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text(
+                'Choose at least 1 Scent on the Package detail to continue your Booking.',
+                key: const Key('order_summary_scent_hint'),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: CardSurfaces.body(context),
+                  height: 1.35,
+                ),
+                softWrap: true,
+              ),
+            ),
 
           // CTA.
           SizedBox(

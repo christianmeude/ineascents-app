@@ -77,6 +77,7 @@ flutter:
 
   # Scent shelf bundle artwork (C144).
   assets:
+    - assets/images/
     - assets/images/scents/
 
   # An image asset can refer to one or more resolution-specific "variants", see

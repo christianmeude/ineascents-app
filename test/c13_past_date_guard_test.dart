@@ -129,6 +129,9 @@ void main() {
       ..setSelectedDate(date)
       ..setSelectedTime('14:00:00')
       ..setSelectedPax(50)
+      // C169: Scent is required to proceed — seed one (as the Package
+      // detail shelf would) so the flow can advance past Schedule.
+      ..toggleScent(1)
       ..setPaymentMethod('online');
   }
 

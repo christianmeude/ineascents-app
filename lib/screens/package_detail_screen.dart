@@ -151,11 +151,11 @@ class _PackageDetailScreenState extends ConsumerState<PackageDetailScreen> {
     final bodyColor = CardSurfaces.body(context);
     final groups = groupScentChoices(package.scents);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // C167: router-aware back to the packages list.
-        Align(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= 768;
+
+        final backBtn = Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
             key: const Key('detail_back'),
@@ -163,19 +163,17 @@ class _PackageDetailScreenState extends ConsumerState<PackageDetailScreen> {
             icon: const Icon(Icons.arrow_back_rounded, size: 18),
             label: const Text('Back to Packages'),
           ),
-        ),
-        const SizedBox(height: 8),
-        // C166: parent header above the cards.
-        Text(
+        );
+
+        final headerText = Text(
           'Package Details',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: titleColor,
             fontWeight: FontWeight.w700,
           ),
-        ),
-        const SizedBox(height: 12),
-        // Pax Choice header.
-        Container(
+        );
+
+        final paxHeader = Container(
           key: const Key('detail_pax_header'),
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -249,27 +247,20 @@ class _PackageDetailScreenState extends ConsumerState<PackageDetailScreen> {
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 16),
+        );
 
-        // Inclusions + Freebies (static Offering copy).
-        _StaticListCard(title: 'Inclusions', items: Offering.inclusions),
-        const SizedBox(height: 12),
-        _StaticListCard(title: 'Freebies', items: Offering.freebies),
-        const SizedBox(height: 16),
+        final inclusions = _StaticListCard(title: 'Inclusions', items: Offering.inclusions);
+        final freebies = _StaticListCard(title: 'Freebies', items: Offering.freebies);
 
-        // Scent shelf.
-        ScentShelf(
+        final scentShelf = ScentShelf(
           key: const Key('detail_scent_shelf'),
           groups: groups,
           selectedIds: selectedScentIds,
           onToggle: (id) =>
               ref.read(bookingFlowProvider.notifier).toggleScent(id),
-        ),
-        const SizedBox(height: 20),
+        );
 
-        // CTA → booking flow (pax + scent_ids already in the flow).
-        SizedBox(
+        final bookCTA = SizedBox(
           width: double.infinity,
           height: 50,
           child: ElevatedButton(
@@ -285,9 +276,71 @@ class _PackageDetailScreenState extends ConsumerState<PackageDetailScreen> {
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-      ],
+        );
+
+        if (wide) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              backBtn,
+              const SizedBox(height: 8),
+              headerText,
+              const SizedBox(height: 16),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        paxHeader,
+                        const SizedBox(height: 16),
+                        inclusions,
+                        const SizedBox(height: 12),
+                        freebies,
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 32),
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        scentShelf,
+                        const SizedBox(height: 20),
+                        bookCTA,
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            backBtn,
+            const SizedBox(height: 8),
+            headerText,
+            const SizedBox(height: 12),
+            paxHeader,
+            const SizedBox(height: 16),
+            inclusions,
+            const SizedBox(height: 12),
+            freebies,
+            const SizedBox(height: 16),
+            scentShelf,
+            const SizedBox(height: 20),
+            bookCTA,
+            const SizedBox(height: 8),
+          ],
+        );
+      },
     );
   }
 }

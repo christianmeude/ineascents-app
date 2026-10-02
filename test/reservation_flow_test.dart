@@ -41,7 +41,17 @@ void main() {
     int packageId = 42,
     Package? package,
     FakeApiBackend? backend,
+    ProviderContainer? container,
   }) {
+    final child = MaterialApp(
+      theme: AppTheme.lightTheme,
+      home: ResponsiveAppShell(child: BookingScreen(packageId: packageId)),
+    );
+    // C169: tests that drive the UI proceed gates pass a seeded
+    // container (one Scent chosen); otherwise a plain ProviderScope.
+    if (container != null) {
+      return UncontrolledProviderScope(container: container, child: child);
+    }
     return ProviderScope(
       overrides: [
         packageDetailsProvider(
@@ -51,11 +61,30 @@ void main() {
           buildFakeRestClient(backend ?? FakeApiBackend()),
         ),
       ],
-      child: MaterialApp(
-        theme: AppTheme.lightTheme,
-        home: ResponsiveAppShell(child: BookingScreen(packageId: packageId)),
-      ),
+      child: child,
     );
+  }
+
+  /// C169: seeded flow container — one Scent chosen (as the Package
+  /// detail shelf would) so the UI proceed gates pass. Tests that
+  /// assert POSTs pass their own [backend] to inspect it.
+  ProviderContainer c169SeededContainer({
+    Package? package,
+    FakeApiBackend? backend,
+    int packageId = 42,
+  }) {
+    final container = ProviderContainer(
+      overrides: [
+        packageDetailsProvider(
+          packageId,
+        ).overrideWith((ref) => package ?? testPackage),
+        apiClientProvider.overrideWithValue(
+          buildFakeRestClient(backend ?? FakeApiBackend()),
+        ),
+      ],
+    );
+    container.read(bookingFlowProvider.notifier).toggleScent(1);
+    return container;
   }
 
   /// Fills the contact fields on the mobile Step 3 (Details) view.
@@ -396,8 +425,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -448,8 +482,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -734,8 +773,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -962,8 +1006,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(375, 667)),
+          createBookingScreenWidget(
+            screenSize: const Size(375, 667),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1025,8 +1074,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(375, 667)),
+          createBookingScreenWidget(
+            screenSize: const Size(375, 667),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1251,8 +1305,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(800, 420)),
+          createBookingScreenWidget(
+            screenSize: const Size(800, 420),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1346,8 +1405,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1430,8 +1494,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1492,8 +1561,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(900, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(900, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1554,8 +1628,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1618,8 +1697,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1665,8 +1749,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1718,8 +1807,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1772,8 +1866,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1828,8 +1927,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1868,8 +1972,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1905,8 +2014,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(375, 667)),
+          createBookingScreenWidget(
+            screenSize: const Size(375, 667),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -1962,8 +2076,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(900, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(900, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -2034,14 +2153,11 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
+      final container = c169SeededContainer();
+      addTearDown(container.dispose);
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            packageDetailsProvider(42).overrideWith((ref) => testPackage),
-            apiClientProvider.overrideWithValue(
-              buildFakeRestClient(FakeApiBackend()),
-            ),
-          ],
+        UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             theme: AppTheme.darkTheme,
             home: const ResponsiveAppShell(child: BookingScreen(packageId: 42)),
@@ -2071,14 +2187,11 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              packageDetailsProvider(42).overrideWith((ref) => testPackage),
-              apiClientProvider.overrideWithValue(
-                buildFakeRestClient(FakeApiBackend()),
-              ),
-            ],
+          UncontrolledProviderScope(
+            container: container,
             child: MaterialApp(
               theme: AppTheme.lightTheme,
               builder: (context, child) {
@@ -2124,8 +2237,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -2175,8 +2293,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -2214,8 +2337,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -2245,14 +2373,11 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              packageDetailsProvider(42).overrideWith((ref) => testPackage),
-              apiClientProvider.overrideWithValue(
-                buildFakeRestClient(FakeApiBackend()),
-              ),
-            ],
+          UncontrolledProviderScope(
+            container: container,
             child: MaterialApp(
               theme: AppTheme.lightTheme,
               builder: (context, child) {
@@ -2297,8 +2422,13 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
+        final container = c169SeededContainer();
+        addTearDown(container.dispose);
         await tester.pumpWidget(
-          createBookingScreenWidget(screenSize: const Size(1200, 800)),
+          createBookingScreenWidget(
+            screenSize: const Size(1200, 800),
+            container: container,
+          ),
         );
         await tester.pumpAndSettle();
 

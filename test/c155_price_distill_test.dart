@@ -29,14 +29,24 @@ void main() {
     images: const [],
   );
 
-  Widget buildWidget() {
-    return ProviderScope(
+  ProviderContainer buildContainer() {
+    final container = ProviderContainer(
       overrides: [
         packageDetailsProvider(42).overrideWith((ref) => package),
         apiClientProvider.overrideWithValue(
           buildFakeRestClient(FakeApiBackend()),
         ),
       ],
+    );
+    // C169: Scent is required to proceed — seed one (as the Package
+    // detail shelf would) so the flow can advance past Schedule.
+    container.read(bookingFlowProvider.notifier).toggleScent(1);
+    return container;
+  }
+
+  Widget buildWidget(ProviderContainer container) {
+    return UncontrolledProviderScope(
+      container: container,
       child: MaterialApp(
         theme: AppTheme.lightTheme,
         home: ResponsiveAppShell(
@@ -69,7 +79,9 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(buildWidget());
+      final container = buildContainer();
+      addTearDown(container.dispose);
+      await tester.pumpWidget(buildWidget(container));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Proceed'));

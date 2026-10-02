@@ -32,14 +32,24 @@ void main() {
     images: const [],
   );
 
-  Widget buildWidget() {
-    return ProviderScope(
+  ProviderContainer buildContainer() {
+    final container = ProviderContainer(
       overrides: [
         packageDetailsProvider(42).overrideWith((ref) => longPackage),
         apiClientProvider.overrideWithValue(
           buildFakeRestClient(FakeApiBackend()),
         ),
       ],
+    );
+    // C169: Scent is required to proceed — seed one (as the Package
+    // detail shelf would) so the flow can advance past Schedule.
+    container.read(bookingFlowProvider.notifier).toggleScent(1);
+    return container;
+  }
+
+  Widget buildWidget(ProviderContainer container) {
+    return UncontrolledProviderScope(
+      container: container,
       child: MaterialApp(
         theme: AppTheme.lightTheme,
         home: ResponsiveAppShell(
@@ -65,7 +75,9 @@ void main() {
   }
 
   Future<void> goToMobilePayment(WidgetTester tester) async {
-    await tester.pumpWidget(buildWidget());
+    final container = buildContainer();
+    addTearDown(container.dispose);
+    await tester.pumpWidget(buildWidget(container));
     await tester.pumpAndSettle();
 
     // Step 2 → Step 3.
@@ -134,7 +146,9 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(buildWidget());
+      final container = buildContainer();
+      addTearDown(container.dispose);
+      await tester.pumpWidget(buildWidget(container));
       await tester.pumpAndSettle();
 
       // Mobile price-details card does not render on tablet; the rail owns

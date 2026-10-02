@@ -300,13 +300,16 @@ class PackageOfferingHero extends StatelessWidget {
                     package.images![0],
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return _MonogramTile(
-                        name: package.name,
-                        isDark: isDark,
+                      return Image.asset(
+                        'assets/images/bar-1440.webp',
+                        fit: BoxFit.cover,
                       );
                     },
                   )
-                : _MonogramTile(name: package.name, isDark: isDark),
+                : Image.asset(
+                    'assets/images/bar-1440.webp',
+                    fit: BoxFit.cover,
+                  ),
           );
           return ClipRRect(
             borderRadius: const BorderRadius.only(

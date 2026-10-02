@@ -19,6 +19,34 @@ class AppRouter {
       // You can add auth checks here if needed
       return null;
     },
+    // C161: branded fallback for unknown routes.
+    errorBuilder: (context, state) => _titled(
+      'Page not found – Inea Scents',
+      Scaffold(
+        appBar: AppBar(title: const Text('Inea Scents')),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Semantics(
+                label: 'Page not found',
+                child: const Text('Page not found'),
+              ),
+              const SizedBox(height: 16),
+              Semantics(
+                button: true,
+                label: 'Back to home',
+                child: FilledButton(
+                  key: const Key('not_found_back_home'),
+                  onPressed: () => context.go('/home'),
+                  child: const Text('Back to home'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
     routes: [
       GoRoute(path: '/', redirect: (context, state) => '/home'),
       GoRoute(
@@ -52,6 +80,14 @@ class AppRouter {
         builder: (context, state) => _titled(
           'Privacy Policy – Inea Scents',
           const PrivacyPolicyScreen(),
+        ),
+      ),
+      // C161: static system status (offline-aware placeholder).
+      GoRoute(
+        path: '/status',
+        builder: (context, state) => _titled(
+          'Status – Inea Scents',
+          const StatusScreen(),
         ),
       ),
       GoRoute(
